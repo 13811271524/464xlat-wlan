@@ -20,13 +20,14 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.net.wifi;
 
 public class ConnectivityReceiver extends BroadcastReceiver {
-	private static DetailedState mobileStatus = null;
-	private static String MobileIPv6Address = null;
-	private static String MobileIPv4Address = null;
-	private static Integer MobileIPv6SubnetLength = null;
-	private static String MobileInterfaceName = null;
+	private static DetailedState wifiStatus = null;
+	private static String WIFIIPv6Address = null;
+	private static String WIFIIPv4Address = null;
+	private static Integer WIFIIPv6SubnetLength = null;
+	private static String WIFIInterfaceName = null;
 	public final static String ACTION_CONNECTIVITY_CHANGE = "org.drown.464xlat.ConnectionChanges";
 	public final static String EXTRA_MESSAGE = "message";
 	
@@ -36,19 +37,19 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 		LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 	}
 	
-	public static String getMobileStatus() {
-		return mobileStatus == null ? "??" : mobileStatus.toString();
+	public static String getWIFIStatus() {
+		return wifiStatus == null ? "??" : wifiStatus.toString();
 	}
 	
-	public static String getMobileIPv6Address() {
-		return MobileIPv6Address == null ? "" : MobileIPv6Address;
+	public static String getWIFIIPv6Address() {
+		return WIFIIPv6Address == null ? "" : WIFIIPv6Address;
 	}
 	
-	public static String getMobileIPv4Address() {
-		return MobileIPv4Address == null ? "" : MobileIPv4Address;
+	public static String getWIFIIPv4Address() {
+		return WIFIIPv4Address == null ? "" : WIFIIPv4Address;
 	}
 	
-	// relies on MobileInterfaceName, call after findIPv6Addresses()
+	// relies on WIFIInterfaceName, call after findIPv6Addresses()
 	private static void findIPv4Addresses() {
 		try {
 			Enumeration<NetworkInterface> nilist = NetworkInterface.getNetworkInterfaces();
@@ -59,7 +60,7 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 					while(Addresses.hasMoreElements()) {
 						InetAddress address = Addresses.nextElement();
 						if(address instanceof Inet4Address) {
-							MobileIPv4Address = address.getHostAddress();
+							WIFIIPv4Address = address.getHostAddress();
 							return;
 						}
 					}
@@ -68,7 +69,7 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 		} catch (SocketException e) {
 			Log.e("findIPv4Addresses", "getNetworkInterfaces failed = "+e.toString());
 		}
-		MobileIPv4Address = null;
+		WIFIIPv4Address = null;
 	}
 	
 	// gingerbread bug: no IPv6 from NetworkInterface
@@ -88,10 +89,10 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 					String interfaceName = ipv6_match.group(11);
 					if(scope.equals("00") && interfaceName.indexOf("rmnet") > -1) {
 						found_interface = true;
-						MobileInterfaceName = interfaceName;
-						MobileIPv6Address = ipv6_match.group(1)+":"+ipv6_match.group(2)+":"+ipv6_match.group(3)+":"+ipv6_match.group(4)+
+						WIFIInterfaceName = interfaceName;
+						WIFIIPv6Address = ipv6_match.group(1)+":"+ipv6_match.group(2)+":"+ipv6_match.group(3)+":"+ipv6_match.group(4)+
 								":"+ipv6_match.group(5)+":"+ipv6_match.group(6)+":"+ipv6_match.group(7)+":"+ipv6_match.group(8);
-						MobileIPv6SubnetLength = len;
+						WIFIIPv6SubnetLength = len;
 					}
 				} else {
 				  Log.d("findIPv6Addresses", "not matched ifline = "+ifline);
@@ -102,9 +103,9 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 			Log.d("findIPv6Addresses", "failed: "+e.toString());
 		}
 		if(!found_interface) {
-			MobileInterfaceName = null;
-			MobileIPv6Address = null;
-			MobileIPv6SubnetLength = null;
+			WIFIInterfaceName = null;
+			WIFIIPv6Address = null;
+			WIFIIPv6SubnetLength = null;
 		}
 	}
 	
@@ -112,20 +113,20 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 		ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 	    NetworkInfo[] netInfo = cm.getAllNetworkInfo();
 	    for (NetworkInfo ni : netInfo) {
-	    	if(ni.getTypeName().equals("mobile")) {
-	    		if(mobileStatus == null || !mobileStatus.equals(ni.getDetailedState())) {
+	    	if(ni.getTypeName().equals("wifi")) {
+	    		if(wifiStatus == null || !wifiStatus.equals(ni.getDetailedState())) {
     				findIPv6Addresses();
     				findIPv4Addresses();
-	    			sendConnectivityChangeIntent(context, "[Conn] mobile = "+ni.getDetailedState().toString());
-	    			mobileStatus = ni.getDetailedState();
-	    			if(mobileStatus.toString().equals("CONNECTED")) {
+	    			sendConnectivityChangeIntent(context, "[Conn] wifi = "+ni.getDetailedState().toString());
+	    			wifiStatus = ni.getDetailedState();
+	    			if(wifiStatus.toString().equals("CONNECTED")) {
 	    				Log.d("rescan", "connected");
 	    				// only start clat if we're on a V6-only network
-	    				if(MobileIPv4Address == null && MobileIPv6Address != null) {
-	    					Clat.startClat(context,MobileInterfaceName);
+	    				if(WIFIIPv4Address == null && WIFIIPv6Address != null) {
+	    					Clat.startClat(context,WIFIInterfaceName);
 	    				}
 	    			} else {
-	    				Log.d("rescan", "other state "+mobileStatus.toString());
+	    				Log.d("rescan", "other state "+wifiStatus.toString());
 	    				Tethering.teardownIfUp(context);
 	    				Clat.stopClatIfStarted(context);
 	    			}
@@ -147,7 +148,7 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 				}
 				if(Tethering.NoTethering()) {
 					findIPv6Addresses();
-					String errorMessage = Tethering.setupIPv6(context, act, MobileIPv6Address, MobileIPv6SubnetLength, MobileInterfaceName);
+					String errorMessage = Tethering.setupIPv6(context, act, WIFIIPv6Address, WIFIIPv6SubnetLength, WIFIInterfaceName);
 					if(errorMessage != null) {
 						sendConnectivityChangeIntent(context, errorMessage);
 					} else {

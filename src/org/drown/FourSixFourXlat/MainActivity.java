@@ -13,13 +13,13 @@ import android.view.Menu;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-	TextView TetherStatus, MobileStatus, LastMessage, BinaryStatus, IPv4Address, IPv6Address, ClatStatus, Stdout, Stderr;
+	TextView TetherStatus, WIFIStatus, LastMessage, BinaryStatus, IPv4Address, IPv6Address, ClatStatus, Stdout, Stderr;
 	
 	private void UpdateText() {
 		TetherStatus.setText(Tethering.InterfaceName());
-		MobileStatus.setText(ConnectivityReceiver.getMobileStatus());
-		IPv6Address.setText(ConnectivityReceiver.getMobileIPv6Address());
-		IPv4Address.setText(ConnectivityReceiver.getMobileIPv4Address());
+		WIFIStatus.setText(ConnectivityReceiver.getWIFIStatus());
+		IPv6Address.setText(ConnectivityReceiver.getWIFIIPv6Address());
+		IPv4Address.setText(ConnectivityReceiver.getWIFIIPv4Address());
 		ClatStatus.setText(Clat.getClatInterface());
 	}
 	
@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
 		LocalBroadcastManager.getInstance(this).registerReceiver(mConnectionChanges, messageFilter);
 		
 		TetherStatus = (TextView) findViewById(R.id.TetherStatus);
-		MobileStatus = (TextView) findViewById(R.id.MobileStatus);
+		WIFIStatus = (TextView) findViewById(R.id.WIFIStatus);
 		LastMessage = (TextView) findViewById(R.id.LastMessage);
 		BinaryStatus = (TextView) findViewById(R.id.BinaryStatus);
 		IPv6Address = (TextView) findViewById(R.id.IPv6Address);
