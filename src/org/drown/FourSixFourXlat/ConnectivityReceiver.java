@@ -20,7 +20,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.net.wifi;
+//import android.net.wifi;
 
 public class ConnectivityReceiver extends BroadcastReceiver {
 	private static DetailedState wifiStatus = null;
