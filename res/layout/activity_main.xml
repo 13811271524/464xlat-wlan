@@ -53,20 +53,20 @@
         android:textAppearance="?android:attr/textAppearanceMedium" />
     
     <TextView
-        android:id="@+id/MobileStatusLabel"
+        android:id="@+id/WIFIStatusLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/ClatStatusLabel"
         android:layout_below="@+id/ClatStatusLabel"
         android:layout_marginTop="20dp"
-        android:text="@string/MobileStatus"
+        android:text="@string/WIFIStatus"
         android:textAppearance="?android:attr/textAppearanceMedium" />
     
     <TextView
-        android:id="@+id/MobileStatus"
+        android:id="@+id/WIFIStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/MobileStatusLabel"
+        android:layout_alignBottom="@+id/WIFIStatusLabel"
         android:layout_alignRight="@+id/ClatStatus"
         android:textAppearance="?android:attr/textAppearanceMedium" />
     
@@ -74,8 +74,8 @@
         android:id="@+id/IPv4AddressLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/MobileStatusLabel"
-        android:layout_below="@+id/MobileStatusLabel"
+        android:layout_alignLeft="@+id/WIFIStatusLabel"
+        android:layout_below="@+id/WIFIStatusLabel"
         android:layout_marginTop="20dp"
         android:text="@string/IPv4Address"
         android:textAppearance="?android:attr/textAppearanceMedium" />
@@ -85,7 +85,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/IPv4AddressLabel"
-        android:layout_alignRight="@+id/MobileStatus"
+        android:layout_alignRight="@+id/WIFIStatus"
         android:textAppearance="?android:attr/textAppearanceMedium" />
     
    	<TextView

@@ -3,7 +3,7 @@
 
     <string name="app_name">464xlat</string>
     <string name="TetherStatus">Tether Status</string>
-    <string name="MobileStatus">Mobile Status</string>
+    <string name="WIFIStatus">WIFI Status</string>
     <string name="LastMessage">Last Message</string>
     <string name="BinaryStatus">Binary Status</string>
     <string name="IPv6Address">IPv6 Address</string>
