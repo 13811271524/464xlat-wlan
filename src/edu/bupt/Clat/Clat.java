@@ -1,18 +1,28 @@
-package org.drown.FourSixFourXlat;
+package edu.bupt.Clat;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Scanner;
 
+//import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+//import android.net.wifi.WifiManager;
+//import android.net.wifi.WifiInfo;
+//import android.os.Bundle;
 import android.util.Log;
+
 
 public class Clat {
 	private static String ClatInterface = null;
 	private static boolean hasClatdState = false;
 	private static File ClatState = new File(InstallBinary.DATA_DIR, "clat.state");
+//	public String WiFiMacAddr = GetMacIP.getLocalMacAddress();
+//	Bundle mbundle = this.getIntent().getExtras();
+//	String[] ClatSubfix = mbundle.getStringArray(GetMacIP.v6ID);
 	
+		
 	public static String getClatInterface() {
 		InitFromDisk();
 		return (ClatInterface == null) ? "" : ClatInterface;
@@ -56,7 +66,7 @@ public class Clat {
 		}
 	}
 	
-	public static void startClat(Context context, String interfaceName) {
+	public static void startClat(Context context, String interfaceName) throws IOException {
 		InitFromDisk();
 		if(ClatInterface != null) {
 			Log.e("startClat", "Clat was already started");
@@ -64,9 +74,12 @@ public class Clat {
 		}
 		
 		ClatInterface = interfaceName;
-		hasClatdState = true;
+		hasClatdState = true;		
 		
 		WriteClatState(interfaceName);
+		
+//		MacAddr = new String(static WiFiMacAddr[0]);		
+//		v6ID = MacToIPv6(MacAddr);
 		
 		Log.d("startClat", "Clat is starting on "+interfaceName);
 		
@@ -74,12 +87,28 @@ public class Clat {
 		Script.append("#!/system/bin/sh\n");
 		Script.append("echo `date` starting clatd_launch >>/data/misc/clatd.log\n");
 		Script.append("cat "+InstallBinary.DATA_DIR+"clatd.conf >/data/misc/clatd.conf\n");
+//		Script.append("cat "+InstallBinary.DATA_DIR+"clatd.conf >/system/etc/clatd.conf\n");
+//		Script.append("echo "+ClatSubfix+" >> /data/misc/clatd.conf\n");
 		Script.append("chmod 644 /data/misc/clatd.conf\n");
-		Script.append(InstallBinary.BIN_DIR+"clatd -i "+interfaceName+" -c /data/misc/clatd.conf >/dev/null 2>&1 &\n");
+//		Script.append("chmod 644 /system/etc/clatd.conf\n");
+//		Script.append(InstallBinary.BIN_DIR+"clatd -i "+interfaceName+" -c /data/misc/clatd.conf >/dev/null 2>&1 &\n");
+		Script.append(InstallBinary.BIN_DIR+"clatd -i "+interfaceName+" >/dev/null 2>&1 &\n");
 		Script.append("CLATPID=$!\n");
 		Script.append("echo $CLATPID >"+InstallBinary.DATA_DIR+"clatd.pid\n");
 		Script.append("echo started clat, pid = $CLATPID\n");
 		Script.append("echo `date` ending clatd_launch, pid = $CLATPID >>/data/misc/clatd.log\n");
+		
+		Script.append("echo 1 > /proc/sys/net/ipv6/conf/all/forwarding\n");
+		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat/forwarding\n");
+		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat4/forwarding\n");
+		Script.append("echo 1 > /proc/sys/net/ipv6/conf/all/proxy_ndp\n");
+		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat/proxy_ndp\n");
+		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat4/proxy_ndp\n");
+		
+		Script.append("ip -6 neigh add proxy "+MainActivity.ClatIPv6Addr+" dev "+RunAsRoot.execCommand("getprop wifi.interface")+"\n");
+		
+		Script.append("setprop net.dns1 8.8.8.8\n");
+		Script.append("setprop net.dns2 114.114.115.115\n");
 		
 		Intent startClat = new Intent(context, RunAsRoot.class);
 		startClat.putExtra(RunAsRoot.EXTRA_STAGE_NAME, "start_clat");
@@ -114,4 +143,15 @@ public class Clat {
 		stopClat.putExtra(RunAsRoot.EXTRA_SCRIPT_CONTENTS, Script.toString());
 		context.startService(stopClat);
 	}
+	
+/*	public String getLocalMacAddress() { 
+
+    	WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE); 
+    	WifiInfo info = wifi.getConnectionInfo(); 
+    	
+    	return info.getMacAddress(); 
+
+    	}*/
+    
+    
 }

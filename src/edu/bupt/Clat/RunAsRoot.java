@@ -1,9 +1,12 @@
-package org.drown.FourSixFourXlat;
+package edu.bupt.Clat;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 
 import android.app.IntentService;
@@ -15,7 +18,7 @@ public class RunAsRoot extends IntentService {
 	public static final String EXTRA_SCRIPT_CONTENTS = "ScriptContents";
 	public static final String EXTRA_STAGE_NAME = "StageName";
 	private static HashMap<String, String> shellOutput = new HashMap<String, String>();
-	public static final String ACTION_ROOTSCRIPT_DONE = "org.drown.464xlat.RootScriptDone";
+	public static final String ACTION_ROOTSCRIPT_DONE = "edu.bupt.464xlat.RootScriptDone";
 	
 	public RunAsRoot() {
 		super("RunAsRoot");
@@ -117,4 +120,53 @@ public class RunAsRoot extends IntentService {
 			return shellOutput.get(StageName+"_stderr");
 		}
 	}
+	
+	/**
+     * Execute linux commands with root permission
+     * 
+     * @return result
+     */
+    public static String execCommand(String cmd) throws IOException {
+    	Runtime runtime = Runtime.getRuntime();
+		Process proc = runtime.exec("su");  //Process proc has got root privilege
+		DataOutputStream os = new DataOutputStream(proc.getOutputStream());
+		os.writeBytes(cmd + "\n");  //Use "\n" to flag the end of command
+		os.writeBytes("exit\n");
+		os.flush();
+
+        //Use InputStreamReader to obtain console output
+        InputStream is = proc.getInputStream();
+        InputStreamReader inputStreamReader = new InputStreamReader(is);
+        BufferedReader inputReader = new BufferedReader(inputStreamReader);
+        
+        //Use InputStreamReader to obtain console error message
+        InputStream es = proc.getErrorStream();
+        InputStreamReader errorStreamReader = new InputStreamReader(es);
+        BufferedReader errorReader = new BufferedReader(errorStreamReader);
+        
+        // read the ls output
+        String line = "";
+        StringBuilder sb = new StringBuilder(line);
+        while ((line = inputReader.readLine()) != null) {
+            sb.append(line);
+            sb.append('\n');
+        }
+        while ((line = errorReader.readLine()) != null) {
+            sb.append(line);
+            sb.append('\n');
+        }
+        
+        //exec() returns immediately rather than wait until the command is finished,
+        //so we use waitFor() to make sure that it returns after the command has been finished.
+        try {
+            if (proc.waitFor() != 0) {
+                System.err.println("exit value = " + proc.exitValue());
+            } 
+        }
+        catch (InterruptedException e) {  
+            System.err.println(e);
+        }
+        Log.v("execCommand", sb.toString()); 
+        return sb.toString();
+    } 
 }

@@ -1,4 +1,4 @@
-package org.drown.FourSixFourXlat;
+package edu.bupt.Clat;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.util.Log;
 
 public class Tethering {
-	private static String WIFIIPv6Address = null;
+	private static String WiFiIPv6Address = null;
 	private static String IPv6TetherInterface = null;
 	private static boolean ClatdWasRunning = false;
 	private static boolean hasTetheringState = false;
@@ -23,7 +23,7 @@ public class Tethering {
 	    radvd_conf.append("MinRtrAdvInterval 20;\n");
 	    radvd_conf.append("AdvDefaultLifetime 60;\n");
 	    radvd_conf.append("MaxRtrAdvInterval 100;\n");
-	    radvd_conf.append("prefix "+WIFIIPv6Address+"/64\n");
+	    radvd_conf.append("prefix "+WiFiIPv6Address+"/64\n");
 	    radvd_conf.append("{\n");
 	    radvd_conf.append("AdvOnLink on;\n");
 	    radvd_conf.append("AdvAutonomous on;\n");
@@ -59,7 +59,7 @@ public class Tethering {
 				IPv6TetherInterface = TetheringState_in.nextLine();
 			}
 			if(TetheringState_in.hasNextLine()) {
-				WIFIIPv6Address = TetheringState_in.nextLine();
+				WiFiIPv6Address = TetheringState_in.nextLine();
 			}
 			if(TetheringState_in.hasNextLine()) {
 				String ClatdWasRunning_str = TetheringState_in.nextLine();
@@ -78,7 +78,7 @@ public class Tethering {
 		}
 	}
 	
-	public static String setupIPv6(Context context, String interfaceName, String v6address, int WIFIIPv6SubnetLength, String WIFIInterfaceName) {
+	public static String setupIPv6(Context context, String interfaceName, String v6address, int WiFiIPv6SubnetLength, String WiFiInterfaceName) {
 		File radvd_conf_file = new File(InstallBinary.DATA_DIR, "radvd.conf");
 		File radvd_pid_file = new File(InstallBinary.DATA_DIR, "radvd.pid");
 		
@@ -86,7 +86,7 @@ public class Tethering {
 			return "no v6address";
 		}
 		
-		WIFIIPv6Address = v6address;
+		WiFiIPv6Address = v6address;
 		IPv6TetherInterface = interfaceName;
 		ClatdWasRunning = Clat.ClatRunning();
 		hasTetheringState = true;
@@ -96,14 +96,14 @@ public class Tethering {
 		Script.append("#!/system/bin/sh\n");
 		Script.append("cat /proc/sys/net/ipv6/conf/"+interfaceName+"/disable_ipv6 >"+InstallBinary.DATA_DIR+"disable_ipv6\n");
 		Script.append("echo 0 >/proc/sys/net/ipv6/conf/"+interfaceName+"/disable_ipv6\n");
-		Script.append("ip addr add "+WIFIIPv6Address+"/64 dev "+interfaceName+"\n");
-		if(WIFIIPv6SubnetLength == 64) {
+		Script.append("ip addr add "+WiFiIPv6Address+"/64 dev "+interfaceName+"\n");
+		if(WiFiIPv6SubnetLength == 64) {
 			// there's a /64 on the wifi interface, make a higher priority interface route on the tethered interface
-			Script.append("ip -6 route add "+WIFIIPv6Address+"/64 dev "+interfaceName+" metric 1\n");
+			Script.append("ip -6 route add "+WiFiIPv6Address+"/64 dev "+interfaceName+" metric 1\n");
 		}
 		Script.append(InstallBinary.BIN_DIR+"radvd -C "+radvd_conf_file.getPath()+" -p "+InstallBinary.DATA_DIR+"radvd.pid >/dev/null 2>&1\n");
 		Script.append("echo 1 >/proc/sys/net/ipv6/conf/all/forwarding\n");
-		Script.append("ip -6 route add default dev "+WIFIInterfaceName+"\n");
+		Script.append("ip -6 route add default dev "+WiFiInterfaceName+"\n");
 		
 		if(ClatdWasRunning) {
 			Script.append("iptables -t nat -A POSTROUTING -o clat4 -j MASQUERADE\n");
@@ -155,7 +155,7 @@ public class Tethering {
 
 		IPv6TetherInterface = null;
 		ClatdWasRunning = false;
-		WIFIIPv6Address = null;
+		WiFiIPv6Address = null;
 		
 		return null;
 	}

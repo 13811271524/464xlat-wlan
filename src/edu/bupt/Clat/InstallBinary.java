@@ -1,4 +1,4 @@
-package org.drown.FourSixFourXlat;
+package edu.bupt.Clat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,12 +14,14 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 
 public class InstallBinary implements Runnable {
-    public static final String ACTION_INSTALL_BINARY = "org.drown.464xlat.InstallBinary";
+    public static final String ACTION_INSTALL_BINARY = "edu.bupt.464xlat.InstallBinary";
 	public final static String EXTRA_MESSAGE = "message";
-	public final static String DATA_DIR = "/data/data/org.drown.FourSixFourXlat/files/";
+	public final static String DATA_DIR = "/data/data/edu.bupt.Clat/files/";
+//	public final static String CONF_DIR = "/system/etc/";
 	public final static String BIN_DIR = DATA_DIR + "bin/";
 	private final static String INSTALLED_BINARY_VERSION_PREFERENCE = "binaryVersion";
 	private File data_dir;
+//	private File conf_dir;
     private File bindir;
     private Context context;
     private final static String BINARY_VERSION = "1.1";
@@ -33,6 +35,7 @@ public class InstallBinary implements Runnable {
 	public InstallBinary(Context context) {
 		this.context = context;
         data_dir = new File(DATA_DIR);
+//        conf_dir = new File(CONF_DIR);
         bindir = new File(BIN_DIR);
 	}
 	

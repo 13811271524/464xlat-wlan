@@ -1,8 +1,9 @@
-package org.drown.FourSixFourXlat;
+package edu.bupt.Clat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.Inet4Address;
+import java.io.IOException;
+//import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -24,12 +25,15 @@ import android.util.Log;
 
 public class ConnectivityReceiver extends BroadcastReceiver {
 	private static DetailedState wifiStatus = null;
-	private static String WIFIIPv6Address = null;
-	private static String WIFIIPv4Address = null;
-	private static Integer WIFIIPv6SubnetLength = null;
-	private static String WIFIInterfaceName = null;
-	public final static String ACTION_CONNECTIVITY_CHANGE = "org.drown.464xlat.ConnectionChanges";
+	private static String WiFiIPv6Address = null;
+	private static String WiFiIPv4Address = null;
+	private static Integer WiFiIPv6SubnetLength = null;
+	protected static String WiFiInterfaceName = null;
+	public final static String ACTION_CONNECTIVITY_CHANGE = "edu.bupt.464xlat.ConnectionChanges";
 	public final static String EXTRA_MESSAGE = "message";
+	private static String OriginDefaultRoute = null;
+	
+	protected static NetworkInfo aInfo = null;
 	
 	private static void sendConnectivityChangeIntent(Context context, String message) {
 		Intent intent = new Intent(ACTION_CONNECTIVITY_CHANGE);
@@ -37,21 +41,21 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 		LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 	}
 	
-	public static String getWIFIStatus() {
+	public static String getWiFiStatus() {
 		return wifiStatus == null ? "??" : wifiStatus.toString();
 	}
 	
-	public static String getWIFIIPv6Address() {
-		return WIFIIPv6Address == null ? "" : WIFIIPv6Address;
+	public static String getWiFiIPv6Address() {
+		return WiFiIPv6Address == null ? "" : WiFiIPv6Address;
 	}
 	
-	public static String getWIFIIPv4Address() {
-		return WIFIIPv4Address == null ? "" : WIFIIPv4Address;
+	public static String getWiFiIPv4Address() {
+		return WiFiIPv4Address == null ? "" : WiFiIPv4Address;
 	}
 	
-	// relies on WIFIInterfaceName, call after findIPv6Addresses()
+	// relies on WiFiInterfaceName, call after findIPv6Addresses()
 	private static void findIPv4Addresses() {
-		try {
+/*		try {
 			Enumeration<NetworkInterface> nilist = NetworkInterface.getNetworkInterfaces();
 			while(nilist.hasMoreElements()) {
 				NetworkInterface ni = nilist.nextElement();
@@ -60,7 +64,7 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 					while(Addresses.hasMoreElements()) {
 						InetAddress address = Addresses.nextElement();
 						if(address instanceof Inet4Address) {
-							WIFIIPv4Address = address.getHostAddress();
+							WiFiIPv4Address = address.getHostAddress();
 							return;
 						}
 					}
@@ -68,12 +72,12 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 			}
 		} catch (SocketException e) {
 			Log.e("findIPv4Addresses", "getNetworkInterfaces failed = "+e.toString());
-		}
-		WIFIIPv4Address = null;
+		}*/
+		WiFiIPv4Address = getLocalIp4Address();
 	}
 	
 	// gingerbread bug: no IPv6 from NetworkInterface
-	private static void findIPv6Addresses() {
+	private static void findIPv6Addresses() throws IOException {
 		File inet6_file = new File("/proc/net/if_inet6");
 		Boolean found_interface = false;
 		try {
@@ -87,12 +91,12 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 					Integer len = Integer.parseInt(ipv6_match.group(9), 16);
 					String scope = ipv6_match.group(10);
 					String interfaceName = ipv6_match.group(11);
-					if(scope.equals("00") && interfaceName.indexOf("rmnet") > -1) {
+					if(scope.equals("00") && interfaceName.indexOf("wlan") > -1) {
 						found_interface = true;
-						WIFIInterfaceName = interfaceName;
-						WIFIIPv6Address = ipv6_match.group(1)+":"+ipv6_match.group(2)+":"+ipv6_match.group(3)+":"+ipv6_match.group(4)+
+						WiFiInterfaceName = interfaceName;
+						WiFiIPv6Address = ipv6_match.group(1)+":"+ipv6_match.group(2)+":"+ipv6_match.group(3)+":"+ipv6_match.group(4)+
 								":"+ipv6_match.group(5)+":"+ipv6_match.group(6)+":"+ipv6_match.group(7)+":"+ipv6_match.group(8);
-						WIFIIPv6SubnetLength = len;
+						WiFiIPv6SubnetLength = len;
 					}
 				} else {
 				  Log.d("findIPv6Addresses", "not matched ifline = "+ifline);
@@ -103,27 +107,40 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 			Log.d("findIPv6Addresses", "failed: "+e.toString());
 		}
 		if(!found_interface) {
-			WIFIInterfaceName = null;
-			WIFIIPv6Address = null;
-			WIFIIPv6SubnetLength = null;
+			WiFiInterfaceName = RunAsRoot.execCommand("getprop wifi.interface");
+			WiFiIPv6Address = getLocalIpAddress();
+			WiFiIPv6SubnetLength = null;
 		}
 	}
 	
-	public static void rescanNetworkStatus(Context context) {
+	public static void rescanNetworkStatus(Context context) throws IOException {		
 		ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		
+		if(cm != null) {
+			aInfo = cm.getActiveNetworkInfo();
+			if(aInfo == null || !aInfo.isAvailable()){
+				Log.d("aInfo","upy");
+				return;
+			}
+		}
+		
 	    NetworkInfo[] netInfo = cm.getAllNetworkInfo();
 	    for (NetworkInfo ni : netInfo) {
-	    	if(ni.getTypeName().equals("wifi")) {
+	    	if(ni.getTypeName().equalsIgnoreCase("wifi")||ni.getTypeName().equalsIgnoreCase("Wi-Fi")) {
 	    		if(wifiStatus == null || !wifiStatus.equals(ni.getDetailedState())) {
     				findIPv6Addresses();
     				findIPv4Addresses();
 	    			sendConnectivityChangeIntent(context, "[Conn] wifi = "+ni.getDetailedState().toString());
 	    			wifiStatus = ni.getDetailedState();
-	    			if(wifiStatus.toString().equals("CONNECTED")) {
+	    			if(wifiStatus.toString().equalsIgnoreCase("CONNECTED")) {
 	    				Log.d("rescan", "connected");
 	    				// only start clat if we're on a V6-only network
-	    				if(WIFIIPv4Address == null && WIFIIPv6Address != null) {
-	    					Clat.startClat(context,WIFIInterfaceName);
+	    				// del WiFiIPv4Address == null &&
+	    				if( WiFiIPv6Address != null) {
+	    					OriginDefaultRoute = new String(RunAsRoot.execCommand("ip route |grep default |grep "+WiFiInterfaceName));
+	    					RunAsRoot.execCommand("ip route del "+OriginDefaultRoute);
+	    					Clat.stopClatIfStarted(context);
+	    					Clat.startClat(context,WiFiInterfaceName);
 	    				}
 	    			} else {
 	    				Log.d("rescan", "other state "+wifiStatus.toString());
@@ -139,7 +156,12 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		if(intent.getAction().equals("android.net.conn.CONNECTIVITY_CHANGE")) {
-			rescanNetworkStatus(context);
+			try {
+				rescanNetworkStatus(context);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else if(intent.getAction().equals("android.net.conn.TETHER_STATE_CHANGED")) {
 			ArrayList<String> active = intent.getStringArrayListExtra("activeArray");
 			for(String act : active) {
@@ -147,8 +169,13 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 					return;
 				}
 				if(Tethering.NoTethering()) {
-					findIPv6Addresses();
-					String errorMessage = Tethering.setupIPv6(context, act, WIFIIPv6Address, WIFIIPv6SubnetLength, WIFIInterfaceName);
+					try {
+						findIPv6Addresses();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					String errorMessage = Tethering.setupIPv6(context, act, WiFiIPv6Address, WiFiIPv6SubnetLength, WiFiInterfaceName);
 					if(errorMessage != null) {
 						sendConnectivityChangeIntent(context, errorMessage);
 					} else {
@@ -160,4 +187,44 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 			Tethering.teardownIfUp(context);
 		}
 	}
+	
+	public static String getLocalIpAddress() {    
+        try {    
+            for (Enumeration<NetworkInterface> en = NetworkInterface    
+                    .getNetworkInterfaces(); en.hasMoreElements();) {    
+                NetworkInterface intf = en.nextElement();    
+                for (Enumeration<InetAddress> enumIpAddr = intf    
+                        .getInetAddresses(); enumIpAddr.hasMoreElements();) {    
+                    InetAddress inetAddress = enumIpAddr.nextElement();    
+                    if (!inetAddress.isLoopbackAddress()) {    
+                        return inetAddress.getHostAddress().toString();    
+                    }    
+                }    
+            }    
+        } catch (SocketException ex) {    
+            Log.e("WifiPreference IpAddress", ex.toString());    
+        }    
+        return null;    
+    }  
+	
+	public static String getLocalIp4Address() {  
+        try {  
+            for (Enumeration<NetworkInterface> en = NetworkInterface  
+                            .getNetworkInterfaces(); en.hasMoreElements();) {  
+                        NetworkInterface intf = en.nextElement();  
+                       for (Enumeration<InetAddress> enumIpAddr = intf  
+                                .getInetAddresses(); enumIpAddr.hasMoreElements();) {  
+                            InetAddress inetAddress = enumIpAddr.nextElement();  
+                            if (!inetAddress.isLoopbackAddress() && !inetAddress.isLinkLocalAddress()) {  
+                            return inetAddress.getHostAddress().toString();  
+                            }  
+                       }  
+                    }  
+                } catch (SocketException ex) {  
+                    Log.e("WifiPreference IpAddress", ex.toString());  
+                }  
+        
+        
+             return null;  
+} 
 }

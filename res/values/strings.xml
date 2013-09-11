@@ -2,14 +2,14 @@
 <resources>
 
     <string name="app_name">464xlat</string>
-    <string name="TetherStatus">Tether Status</string>
-    <string name="WIFIStatus">WIFI Status</string>
-    <string name="LastMessage">Last Message</string>
-    <string name="BinaryStatus">Binary Status</string>
-    <string name="IPv6Address">IPv6 Address</string>
-    <string name="IPv4Address">IPv4 Address</string>
-    <string name="ClatStatus">Clat Status</string>
-    <string name="StdoutLabel">Stdout</string>
-    <string name="StderrLabel">Stderr</string>
+    <string name="TetherStatus">CLAT 地址</string>
+    <string name="WIFIStatus">Wi-Fi 状态</string>
+    <string name="LastMessage">程序信息</string>
+    <string name="BinaryStatus">程序状态</string>
+    <string name="IPv6Address">IPv6 地址</string>
+    <string name="IPv4Address">IPv4 地址</string>
+    <string name="ClatStatus">无线接口</string>
+    <string name="StdoutLabel">输出</string>
+    <string name="StderrLabel">错误信息</string>
 
 </resources>

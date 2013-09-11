@@ -12,35 +12,65 @@
     android:layout_height="wrap_content" >
 	    
 	<TextView
-        android:id="@+id/TetherStatusLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="20dp"
-        android:text="@string/TetherStatus"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+	    android:id="@+id/TetherStatusLabel"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignLeft="@+id/TetherStatusLabel2"
+	    android:layout_below="@+id/TetherStatusLabel2"
+
+	    android:layout_marginTop="20dp"
+	    android:text="@string/TetherStatus"
+	    android:textAppearance="?android:attr/textAppearanceMedium" />
+	<!--  	    android:layout_alignParentLeft="true"
+	    android:layout_alignParentTop="true"
+	    android:layout_marginLeft="20dp"-->
 
     <TextView
         android:id="@+id/TetherStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/TetherStatusLabel"
+        
+        android:layout_alignRight="@+id/on"
         android:layout_alignBottom="@+id/TetherStatusLabel"
         android:layout_alignParentRight="true"
         android:layout_marginRight="20dp"
         android:textAppearance="?android:attr/textAppearanceMedium" />
+    <!-- android:layout_alignBaseline="@+id/TetherStatusLabel"
+        android:layout_alignBottom="@+id/TetherStatusLabel" -->
+    
+    <TextView
+	    android:id="@+id/TetherStatusLabel2"
+	    android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+	    android:layout_alignParentTop="true"
+        android:layout_marginLeft="20dp"
+	    android:layout_marginTop="20dp"
+        android:singleLine="true"
+	    android:text="CLAT 开关"
+	    android:textAppearance="?android:attr/textAppearanceMedium" />
+    
+    	    <!--android:textColor="#000000"-->
+
+    <org.slipbtn.SlipButton
+        android:id="@+id/on"
+        android:layout_width="100dip"
+        android:layout_height="40dip"
+        android:layout_toRightOf="@id/TetherStatusLabel2"
+         
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="50dp"
+            />
 
 	<TextView
-        android:id="@+id/ClatStatusLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_alignLeft="@+id/TetherStatusLabel"
-        android:layout_below="@+id/TetherStatusLabel"
-        android:text="@string/ClatStatus"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+	    android:id="@+id/ClatStatusLabel"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignLeft="@+id/TetherStatusLabel"
+	    android:layout_below="@+id/TetherStatusLabel"
+	    android:layout_marginTop="20dp"
+	    android:text="@string/ClatStatus"
+	    android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
         android:id="@+id/ClatStatus"
@@ -48,9 +78,10 @@
         android:layout_height="wrap_content"
         android:layout_alignRight="@+id/TetherStatus"
         android:layout_alignBottom="@+id/ClatStatusLabel"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="20dp"
+        
         android:textAppearance="?android:attr/textAppearanceMedium" />
+    <!-- android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp" -->
     
     <TextView
         android:id="@+id/WIFIStatusLabel"
@@ -89,14 +120,14 @@
         android:textAppearance="?android:attr/textAppearanceMedium" />
     
    	<TextView
-	    android:id="@+id/IPv6AddressLabel"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_alignLeft="@+id/IPv4AddressLabel"
-	    android:layout_below="@+id/IPv4AddressLabel"
-	    android:layout_marginTop="20dp"
-	    android:text="@string/IPv6Address"
-	    android:textAppearance="?android:attr/textAppearanceMedium" />
+   	    android:id="@+id/IPv6AddressLabel"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+   	    android:layout_alignLeft="@+id/IPv4AddressLabel"
+   	    android:layout_below="@+id/IPv4AddressLabel"
+   	    android:layout_marginTop="20dp"
+   	    android:text="@string/IPv6Address"
+   	    android:textAppearance="?android:attr/textAppearanceMedium" />
     
     <TextView
         android:id="@+id/IPv6Address"
@@ -131,8 +162,8 @@
         android:id="@+id/BinaryStatusLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/LastMessage"
         android:layout_alignLeft="@+id/LastMessage"
+        android:layout_below="@+id/LastMessage"
         android:layout_marginTop="20dp"
         android:text="@string/BinaryStatus"
         android:textAppearance="?android:attr/textAppearanceMedium" />
