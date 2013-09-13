@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">464xlat</string>
-    <string name="TetherStatus">CLAT 地址</string>
+    <string name="app_name">464蓝桥</string>
+    <string name="ClatAddr">CLAT 地址</string>
+    <string name="CLATSwitch">CLAT 开关</string>
     <string name="WIFIStatus">Wi-Fi 状态</string>
     <string name="LastMessage">程序信息</string>
     <string name="BinaryStatus">程序状态</string>

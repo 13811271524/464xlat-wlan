@@ -22,7 +22,7 @@ import org.slipbtn.SlipButton.OnChangedListener;
 
 
 public class MainActivity extends Activity {
-	TextView TetherStatus, WiFiStatus, LastMessage, BinaryStatus, IPv4Address, IPv6Address, ClatStatus, Stdout, Stderr;
+	TextView ClatAddr, WiFiStatus, LastMessage, BinaryStatus, IPv4Address, IPv6Address, ClatStatus, Stdout, Stderr;
 	
 	private String DefaultRoute = null, wifiinfo;
 	protected String OriginRoute;
@@ -33,14 +33,14 @@ public class MainActivity extends Activity {
 	private SlipButton mSlipButton = null;
 	
 	private void UpdateText() {
-//		TetherStatus.setText(Tethering.InterfaceName());
+//		ClatAddr.setText(Tethering.InterfaceName());
 		wifiinfo = new String(ConnectivityReceiver.getWiFiStatus());
 		
 		if(ConnectivityReceiver.getWiFiStatus().equalsIgnoreCase("CONNECTED")){
 			wifiinfo = new String("已连接");
 		}
 		
-		TetherStatus.setText(ClatIPv6Addr);
+		ClatAddr.setText(ClatIPv6Addr);
 		WiFiStatus.setText(wifiinfo);
 		IPv6Address.setText(ConnectivityReceiver.getWiFiIPv6Address());
 		IPv4Address.setText("192.168.255.1");
@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
 		LocalBroadcastManager.getInstance(this).registerReceiver(mConnectionChanges, messageFilter);
 		
 		
-		TetherStatus = (TextView) findViewById(R.id.TetherStatus);
+		ClatAddr = (TextView) findViewById(R.id.ClatAddr);
 		WiFiStatus = (TextView) findViewById(R.id.WIFIStatus);
 		LastMessage = (TextView) findViewById(R.id.LastMessage);
 		BinaryStatus = (TextView) findViewById(R.id.BinaryStatus);
@@ -156,9 +156,9 @@ public class MainActivity extends Activity {
 				firstRun.putExtra(RunAsRoot.EXTRA_SCRIPT_CONTENTS, 
 						"#!/system/bin/sh\n" + 
 						"echo `date` clatd.conf copy >>/data/misc/clatd.log\n" +
-						"cat "+InstallBinary.DATA_DIR+"clatd.conf >/system/etc/clatd.conf\n" +
-						"echo ipv6_host_id "+ClatSubfix+" >>/system/etc/clatd.conf\n" +
-						"chmod 644 /system/etc/clatd.conf\n" +
+						"cat "+InstallBinary.DATA_DIR+"clatd.conf >/data/misc/clatd.conf\n" +
+						"echo ipv6_host_id "+ClatSubfix+" >>/data/misc/clatd.conf\n" +
+						"chmod 644 /data/misc/clatd.conf\n" +
 						"touch "+InstallBinary.DATA_DIR+"clatd_conf_copied\n" +
 						"ip -6 neigh add proxy "+ClatIPv6Addr+" dev "+RunAsRoot.execCommand("getprop wifi.interface")+"\n"
 						);
@@ -207,18 +207,26 @@ public class MainActivity extends Activity {
         {
             
         	public void OnChanged(boolean CheckState) throws IOException {
-        		// TODO Auto-generated method stub
+        		if (ClatIPv6Addr.equals("无")) {
+        			Toast.makeText(getBaseContext(),"请确保Wi-Fi连接正常并具有IPv6地址" , Toast.LENGTH_SHORT).show();
+        			return;
+        		}
         		if (CheckState) {
-        			Toast.makeText(getBaseContext(),"打开了..." , Toast.LENGTH_SHORT).show();
-//        			Clat.stopClatIfStarted(getBaseContext());		
-        			RunAsRoot.execCommand("ip route del "+OriginRoute); 
-        			Log.d("Route","upy"+OriginRoute+"1");
-        			Clat.startClat(getBaseContext(),ConnectivityReceiver.WiFiInterfaceName);    			
-        	    } else {
-        			Toast.makeText(getBaseContext(),"关闭了..." , Toast.LENGTH_SHORT).show();
+        			if (!Clat.ClatRunning()) {        				
+//            			Clat.stopClatIfStarted(getBaseContext());		
+            			RunAsRoot.execCommand("ip route del "+OriginRoute); 
+            			Log.d("Route","upy"+OriginRoute+"1");
+            			Clat.startClat(getBaseContext(),ConnectivityReceiver.WiFiInterfaceName);
+            			Toast.makeText(getBaseContext(),"CLAT开启成功" , Toast.LENGTH_SHORT).show();
+        			}
+        			else {
+        				Toast.makeText(getBaseContext(),"CLAT已经开启" , Toast.LENGTH_SHORT).show();
+        			}
+        	    } else {        			
         			Clat.stopClatIfStarted(getBaseContext());
         			RunAsRoot.execCommand("ip route add "+OriginRoute);
         			Log.d("Route","upy"+OriginRoute+"2");
+        			Toast.makeText(getBaseContext(),"已关闭CLAT" , Toast.LENGTH_SHORT).show();
         		}
         	}
         });
