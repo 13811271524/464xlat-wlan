@@ -12,5 +12,6 @@
     <string name="ClatStatus">无线接口</string>
     <string name="StdoutLabel">输出</string>
     <string name="StderrLabel">错误信息</string>
+    <string name="update">升级</string>
 
 </resources>

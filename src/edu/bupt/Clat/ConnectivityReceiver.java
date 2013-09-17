@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 //import java.net.Inet4Address;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -188,43 +190,63 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 		}
 	}
 	
-	public static String getLocalIpAddress() {    
-        try {    
-            for (Enumeration<NetworkInterface> en = NetworkInterface    
-                    .getNetworkInterfaces(); en.hasMoreElements();) {    
-                NetworkInterface intf = en.nextElement();    
-                for (Enumeration<InetAddress> enumIpAddr = intf    
-                        .getInetAddresses(); enumIpAddr.hasMoreElements();) {    
-                    InetAddress inetAddress = enumIpAddr.nextElement();    
-                    if (!inetAddress.isLoopbackAddress()) {    
-                        return inetAddress.getHostAddress().toString();    
-                    }    
-                }    
-            }    
-        } catch (SocketException ex) {    
-            Log.e("WifiPreference IpAddress", ex.toString());    
-        }    
-        return null;    
-    }  
+	public static String getLocalIpAddress() throws IOException {
+        InetAddress inetAddress = null;
+        Enumeration<NetworkInterface> networkInterfaces = NetworkInterface
+                .getNetworkInterfaces();
+        outer: while (networkInterfaces.hasMoreElements()) {
+            Enumeration<InetAddress> inetAds = networkInterfaces.nextElement()
+                    .getInetAddresses();
+            while (inetAds.hasMoreElements()) {
+                inetAddress = inetAds.nextElement(); 
+                // Check if it's ipv6 address and reserved address
+                if (inetAddress instanceof Inet6Address && !isReservedAddr(inetAddress)) {
+                    break outer;  
+                }
+                inetAddress = null; //In case when there is no IPv6 interface! 
+            }
+        }
+ 
+        if (inetAddress != null) {
+        	String ipAddr = inetAddress.getHostAddress();
+        	// Filter network card No
+        	int index = ipAddr.indexOf('%');
+        	if (index > 0) {
+        		ipAddr = ipAddr.substring(0, index);
+        	}
+ 
+        	return ipAddr;
+        }
+        else return null;
+    } 
 	
-	public static String getLocalIp4Address() {  
-        try {  
-            for (Enumeration<NetworkInterface> en = NetworkInterface  
-                            .getNetworkInterfaces(); en.hasMoreElements();) {  
-                        NetworkInterface intf = en.nextElement();  
-                       for (Enumeration<InetAddress> enumIpAddr = intf  
-                                .getInetAddresses(); enumIpAddr.hasMoreElements();) {  
-                            InetAddress inetAddress = enumIpAddr.nextElement();  
-                            if (!inetAddress.isLoopbackAddress() && !inetAddress.isLinkLocalAddress()) {  
-                            return inetAddress.getHostAddress().toString();  
-                            }  
-                       }  
-                    }  
-                } catch (SocketException ex) {  
-                    Log.e("WifiPreference IpAddress", ex.toString());  
-                }  
-        
-        
-             return null;  
-} 
+    public static String getLocalIp4Address() {       
+    	try {       
+    	    for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); 
+    	    		en.hasMoreElements();) {       
+    	    	NetworkInterface intf = en.nextElement();       
+    	        for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); 
+    	        		enumIpAddr.hasMoreElements();) {       
+    	        	InetAddress inetAddress = enumIpAddr.nextElement();   
+    	        	// Check if it's ipv4 address and reserved address
+    	            if (inetAddress instanceof Inet4Address && !isReservedAddr(inetAddress)) {       
+    	            	return inetAddress.getHostAddress().toString();       
+    	            }       
+    	        }       
+    	     }       
+    	 } 
+    	catch (SocketException ex) {       
+    		Log.e("WifiPreference IpAddress", ex.toString());       
+    	}       
+    	return null;       
+	}
+    
+    private static boolean isReservedAddr(InetAddress inetAddr) {
+        if (inetAddr.isAnyLocalAddress() || inetAddr.isLinkLocalAddress()
+                || inetAddr.isLoopbackAddress()) {
+            return true;
+        }
+ 
+        return false;
+    }
 }

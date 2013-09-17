@@ -123,7 +123,8 @@ public class SlipButton extends View implements OnTouchListener
 
     }
 
-    public boolean onTouch(View v, MotionEvent event)
+    @Override
+	public boolean onTouch(View v, MotionEvent event)
     {
         switch (event.getAction())
         // 根据动作来执行代码

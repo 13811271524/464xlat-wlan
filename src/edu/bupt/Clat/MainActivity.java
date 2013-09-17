@@ -1,5 +1,7 @@
 package edu.bupt.Clat;
 
+import org.update.*;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -29,6 +31,8 @@ public class MainActivity extends Activity {
 	protected static String ClatSubfix = null;
 	protected static String WiFiMacAddr = null;
 	protected static String ClatIPv6Addr = null;
+	
+	public static int flag = 0;
 
 	private SlipButton mSlipButton = null;
 	
@@ -43,7 +47,7 @@ public class MainActivity extends Activity {
 		ClatAddr.setText(ClatIPv6Addr);
 		WiFiStatus.setText(wifiinfo);
 		IPv6Address.setText(ConnectivityReceiver.getWiFiIPv6Address());
-		IPv4Address.setText("192.168.255.1");
+		IPv4Address.setText(ConnectivityReceiver.getWiFiIPv4Address());
 		ClatStatus.setText(Clat.getClatInterface());
 	}
 	
@@ -69,6 +73,8 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {    	
     	
+ //   	int flag = 0;
+    	
         super.onCreate(savedInstanceState);    
         setContentView(R.layout.activity_main);           
        
@@ -83,6 +89,16 @@ public class MainActivity extends Activity {
 			ClatSubfix = MacToIPv6(WiFiMacAddr);
 		
 		Log.d("mac","upy04"+ClatSubfix);
+		
+		File system_bin_su = new File("/system/bin/su");
+		if(!system_bin_su.exists()) {
+			flag = 1;
+			File system_xbin_su = new File("/system/xbin/su");
+			if(!system_xbin_su.exists()) {
+//				LastMessage.setText("No /system/bin/su or /system/xbin/su found");
+				flag = 2;
+			}			
+		}
 				
 		try {
 			ConnectivityReceiver.rescanNetworkStatus(this);
@@ -142,11 +158,19 @@ public class MainActivity extends Activity {
 		findView();
 		setListener();
 
-		File system_xbin_su = new File("/system/xbin/su");
-		if(!system_xbin_su.exists()) {
-			LastMessage.setText("No /system/xbin/su found");
+/*		File system_bin_su = new File("/system/bin/su");
+		if(!system_bin_su.exists()) {
+			File system_xbin_su = new File("/system/xbin/su");
+			if(!system_xbin_su.exists()) {
+				LastMessage.setText("No /system/bin/su or /system/xbin/su found");
+				return;
+			}			
+		}*/
+		
+		if(flag == 2) {
+			LastMessage.setText("No /system/bin/su or /system/xbin/su found");
 			return;
-		}
+		}		
 		
 		File clatd_conf_copied = new File(InstallBinary.DATA_DIR+"clatd_conf_copied");
 		if(!clatd_conf_copied.exists()) {
@@ -168,6 +192,12 @@ public class MainActivity extends Activity {
 			}
 			startService(firstRun);
 			LastMessage.setText("copied clatd.conf");
+		}
+		
+		if(UpdateActivity.getServerVerCode()) {
+			Intent it = new Intent();
+			it.setClass(this,UpdateActivity.class);
+			this.startActivity(it);
 		}
     }
     
@@ -206,14 +236,17 @@ public class MainActivity extends Activity {
     	mSlipButton.SetOnChangedListener(new OnChangedListener()
         {
             
-        	public void OnChanged(boolean CheckState) throws IOException {
+        	@Override
+			public void OnChanged(boolean CheckState) throws IOException {
         		if (ClatIPv6Addr.equals("无")) {
-        			Toast.makeText(getBaseContext(),"请确保Wi-Fi连接正常并具有IPv6地址" , Toast.LENGTH_SHORT).show();
+        			Toast.makeText(getBaseContext(),"请确保Wi-Fi网络正常并具有IPv6地址" , Toast.LENGTH_SHORT).show();
         			return;
         		}
         		if (CheckState) {
-        			if (!Clat.ClatRunning()) {        				
-//            			Clat.stopClatIfStarted(getBaseContext());		
+        			Log.d("Route","upyA1");
+        			if (!Clat.ClatRunning()) {	
+//            			Clat.stopClatIfStarted(getBaseContext());	
+        				Log.d("Route","upyA2");
             			RunAsRoot.execCommand("ip route del "+OriginRoute); 
             			Log.d("Route","upy"+OriginRoute+"1");
             			Clat.startClat(getBaseContext(),ConnectivityReceiver.WiFiInterfaceName);

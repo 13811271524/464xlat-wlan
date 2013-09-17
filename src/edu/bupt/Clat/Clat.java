@@ -99,6 +99,7 @@ public class Clat {
 //		Script.append("chmod 644 /system/etc/clatd.conf\n");
 //		Script.append(InstallBinary.BIN_DIR+"clatd -i "+interfaceName+" -c /data/misc/clatd.conf >/dev/null 2>&1 &\n");
 		Script.append(InstallBinary.BIN_DIR+"clatd -i "+interfaceName+" >/dev/null 2>&1 &\n");
+		Log.d("clatStart","upy0"+interfaceName);
 		Script.append("CLATPID=$!\n");
 		Script.append("echo $CLATPID >"+InstallBinary.DATA_DIR+"clatd.pid\n");
 		Script.append("echo started clat, pid = $CLATPID\n");
@@ -114,7 +115,14 @@ public class Clat {
 		Script.append("ip -6 neigh add proxy "+MainActivity.ClatIPv6Addr+" dev "+RunAsRoot.execCommand("getprop wifi.interface")+"\n");
 		
 		Script.append("setprop net.dns1 8.8.8.8\n");
+		Log.d("clatStart","upyA");
 		Script.append("setprop net.dns2 114.114.115.115\n");
+		Script.append("setprop net.wlan0.dns1 8.8.8.8\n");
+		Log.d("clatStart","upyB");
+		Script.append("setprop net.wlan0.dns2 114.114.115.115\n");
+		Script.append("setprop dhcp.wlan0.dns4 8.8.8.8\n");
+		Log.d("clatStart","upyC");
+		Script.append("setprop dhcp.wlan0.dns3 114.114.115.115\n");
 		
 		Intent startClat = new Intent(context, RunAsRoot.class);
 		startClat.putExtra(RunAsRoot.EXTRA_STAGE_NAME, "start_clat");
