@@ -1,16 +1,26 @@
 package edu.bupt.Clat;
 
-import org.update.*;
+//import org.update.*;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
+import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Environment;
+//import android.os.Handler;
+import android.os.StrictMode;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
@@ -19,8 +29,15 @@ import android.view.Menu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.slipbtn.SlipButton;
 import org.slipbtn.SlipButton.OnChangedListener;
+//import org.update.UpdateActivity;
 
 
 public class MainActivity extends Activity {
@@ -35,6 +52,11 @@ public class MainActivity extends Activity {
 	public static int flag = 0;
 
 	private SlipButton mSlipButton = null;
+	
+	public static String update_path = "/data/local/tmp/";
+	
+	public ProgressDialog pBar;
+//	private Handler handler = new Handler();
 	
 	private void UpdateText() {
 //		ClatAddr.setText(Tethering.InterfaceName());
@@ -70,12 +92,27 @@ public class MainActivity extends Activity {
 		}
 	};
 		
-    @Override
+//	@SuppressLint(R.string.newapi)
+	@Override
     public void onCreate(Bundle savedInstanceState) {    	
     	
  //   	int flag = 0;
     	
         super.onCreate(savedInstanceState);    
+        
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+        .detectDiskReads()
+        .detectDiskWrites()
+        .detectAll()   // or .detectAll() for all detectable problems
+        .penaltyLog()
+        .build());
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+        .detectLeakedSqlLiteObjects()
+        .detectLeakedClosableObjects()
+        .penaltyLog()
+        .penaltyDeath()
+        .build());
+        
         setContentView(R.layout.activity_main);           
        
 		InstallBinary install = new InstallBinary(this);
@@ -121,8 +158,9 @@ public class MainActivity extends Activity {
 				
 		Log.d("mac","upy08"+DefaultRoute+"upy09"+OriginRoute);
 		Log.d("mac","upy10"+ConnectivityReceiver.aInfo+"upy11"+ClatIPv6Addr);
+		Log.d("mac","upy10.1"+ConnectivityReceiver.getWiFiIPv6Address()+"upy11.1"+ClatSubfix);
 			
-		if(ConnectivityReceiver.aInfo != null && ClatSubfix != null){			
+		if(ConnectivityReceiver.getWiFiIPv6Address() != null && ClatSubfix != null){			
 			ClatIPv6Addr = ConnectivityReceiver.getWiFiIPv6Address().substring(0, 20)+ClatSubfix.substring(2);
 		}
 		else {			
@@ -194,10 +232,23 @@ public class MainActivity extends Activity {
 			LastMessage.setText("copied clatd.conf");
 		}
 		
-		if(UpdateActivity.getServerVerCode()) {
-			Intent it = new Intent();
-			it.setClass(this,UpdateActivity.class);
-			this.startActivity(it);
+//		Log.d("mainUpdate","upyAA");
+		
+
+		if(Update.getServerVerCode()) {
+			Log.d("mainUpdate","upyAB");
+			int vercode = Config.getVerCode(this);
+			Log.d("mainUpdate","upyAC"+vercode);
+			if(Update.newVerCode > vercode) {
+				Log.d("mainUpdate","upyAD");
+				doNewVersionUpdate();
+				Log.d("mainUpdate","upyAE");
+			}
+			else {
+				Log.d("mainUpdate","upyAF");
+//				notNewVersionShow();
+				Log.d("mainUpdate","upyAG");
+			}
 		}
     }
     
@@ -271,5 +322,166 @@ public class MainActivity extends Activity {
 //        btn = (Button) findViewById(R.id.ringagain);
     	mSlipButton.setCheck(true);
     }   
+    
+    private void doNewVersionUpdate() {
+//        int verCode = Config.getVerCode(this);
+        String verName = Config.getVerName(this);
+        StringBuffer sb = new StringBuffer();
+        sb.append("当前版本:");
+        sb.append(verName);
+//        sb.append(" Code:");
+//        sb.append(verCode);
+        sb.append(", 发现新版本:");
+        sb.append(Update.newVerName);
+//        sb.append(" Code:");
+//        sb.append(Update.newVerCode);
+        sb.append(", 是否更新?");
+        Dialog dialog = new AlertDialog.Builder(this)
+                        .setTitle("软件更新")
+                        .setMessage(sb.toString())
+                        // 设置内容
+                        .setPositiveButton("更新",// 设置确定按钮
+                                        new DialogInterface.OnClickListener() {
+
+                                                @Override
+                                                public void onClick(DialogInterface dialog,
+                                                                int which) {
+                                                        pBar = new ProgressDialog(MainActivity.this);
+                                                        pBar.setTitle("正在下载");
+                                                        pBar.setMessage("请稍候...");
+                                                        pBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                                                        Log.d("upd","upy0");
+                                                        downFile(Config.UPDATE_SERVER
+                                                                        + Config.UPDATE_APKNAME);
+                                                        Log.d("upd","upy1");
+                                                }
+
+                                        })
+                        .setNegativeButton("暂不更新",
+                                        new DialogInterface.OnClickListener() {
+                                                @Override
+												public void onClick(DialogInterface dialog,
+                                                                int whichButton) {
+                                                        // 点击"取消"按钮之后退出程序
+                                                      //  finish();                                                        
+                                                }
+                                        }).create();// 创建
+        // 显示对话框
+        dialog.show();        
+
+    }
+    
+    void downFile(final String url) {
+        pBar.show();
+//        new Thread() {
+//                @Override
+//				public void run() {
+                        HttpClient client = new DefaultHttpClient();
+                        HttpGet get = new HttpGet(url);
+                        HttpResponse response;
+                        Log.d("down","upy0");
+                        try {
+                                response = client.execute(get);
+                                HttpEntity entity = response.getEntity();
+                                long length = entity.getContentLength();
+                                InputStream is = entity.getContent();
+                                FileOutputStream fileOutputStream = null;
+                                Log.d("down","upy1"+Environment.getExternalStorageDirectory().toString());
+                                if (is != null) {
+
+                                        File file = new File(
+                                        		update_path,
+                                                        Config.UPDATE_SAVENAME);
+                                        fileOutputStream = new FileOutputStream(file);                                
+                                        
+                                        byte[] buf = new byte[1024];
+                                        int ch = -1;
+//                                               int count = 0;
+                                        while ((ch = is.read(buf)) != -1) {
+                                                fileOutputStream.write(buf, 0, ch);
+//                                                count += ch;
+                                                if (length > 0) {
+                                                }
+                                        }
+
+                                }
+//                                Log.d("down","upy2");
+                                fileOutputStream.flush();
+                                if (fileOutputStream != null) {
+                                        fileOutputStream.close();
+                                }
+                                Log.d("down","upy3");
+//                                down();
+                                try {
+									InstallBinary.chmod("755", update_path+Config.UPDATE_SAVENAME);
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+                                pBar.cancel();
+                                Log.d("down","upy4");
+                                update();
+                                Log.d("down","upy5");
+                        } catch (ClientProtocolException e) {
+                        	Log.d("down","upy6"+e.toString());
+                                e.printStackTrace();
+                        } catch (IOException e) {
+                        	Log.d("down","upy7"+e.toString());
+                                e.printStackTrace();
+                        }
+ //               }
+
+//        }.start();
+
+	}
+    
+/*    void down() {
+        handler.post(new Runnable() {
+                @Override
+				public void run() {
+                        pBar.cancel();
+                        update();
+                }
+        });
+
+
+    }*/
+    
+    void update() {
+    	
+    	Log.d("mainup","upy0");
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(new File(update_path, Config.UPDATE_SAVENAME)),
+                        "application/vnd.android.package-archive");
+        startActivity(intent);
+        Log.d("mainup","upy1");
+
+    }
+    
+    private void notNewVersionShow() {
+ //       int verCode = Config.getVerCode(this);
+        String verName = Config.getVerName(this);
+        StringBuffer sb = new StringBuffer();
+        sb.append("当前版本:");
+        sb.append(verName);
+ //       sb.append(" Code:");
+ //       sb.append(verCode);
+        sb.append(",\n已是最新版,无需更新!");
+        Dialog dialog = new AlertDialog.Builder(this)
+                        .setTitle("软件更新").setMessage(sb.toString())// 设置内容
+                        .setPositiveButton("确定",// 设置确定按钮
+                                        new DialogInterface.OnClickListener() {
+
+                                                @Override
+                                                public void onClick(DialogInterface dialog,
+                                                                int which) {
+                                                 //       finish();
+                                                }
+
+                                        }).create();// 创建
+        // 显示对话框
+        dialog.show();
+}
 
 }

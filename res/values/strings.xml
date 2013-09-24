@@ -13,5 +13,6 @@
     <string name="StdoutLabel">输出</string>
     <string name="StderrLabel">错误信息</string>
     <string name="update">升级</string>
+    <string name="newapi">NewApi</string>
 
 </resources>

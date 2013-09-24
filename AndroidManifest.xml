@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.bupt.Clat"
-    android:versionCode="18"
-    android:versionName="0.7.0.18" >
+    android:versionCode="20"
+    android:versionName="0.7.0.20" >
 
     <uses-sdk
-        android:minSdkVersion="10"
+        android:minSdkVersion="11"
         android:targetSdkVersion="18" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
