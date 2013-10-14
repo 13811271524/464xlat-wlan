@@ -30,7 +30,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/index_looks_tv"
-                android:textSize="18dip"
+                android:textSize="18sp"
                 android:textColor="@android:color/secondary_text_light"
                 android:textStyle="bold"/>
             <TextView 
@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/index_looks_info_tv"
                 android:textColor="@android:color/secondary_text_light"
-                android:textSize="14dip"/>
+                android:textSize="14sp"/>
         </LinearLayout>
         <ImageView 
             android:layout_width="6dip"
@@ -73,7 +73,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/index_shopping_tv"
-                android:textSize="18dip"
+                android:textSize="18sp"
                 android:textColor="@android:color/secondary_text_light"
                 android:textStyle="bold"/>
             <TextView 
@@ -81,7 +81,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/index_shopping_info_tv"
                 android:textColor="@android:color/secondary_text_light"
-                android:textSize="14dip"/>
+                android:textSize="14sp"/>
         </LinearLayout>
         <ImageView 
             android:layout_width="6dip"
@@ -116,7 +116,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/index_show_tv"
-                android:textSize="18dip"
+                android:textSize="18sp"
                 android:textColor="@android:color/secondary_text_light"
                 android:textStyle="bold"/>
             <TextView 
@@ -124,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/index_show_info_tv"
                 android:textColor="@android:color/secondary_text_light"
-                android:textSize="14dip"/>
+                android:textSize="14sp"/>
         </LinearLayout>
         <ImageView 
             android:layout_width="6dip"
@@ -159,7 +159,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/index_search_tv"
-                android:textSize="18dip"
+                android:textSize="18sp"
                 android:textColor="@android:color/secondary_text_light"
                 android:textStyle="bold"/>
             <TextView 
@@ -167,7 +167,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/index_search_info_tv"
                 android:textColor="@android:color/secondary_text_light"
-                android:textSize="14dip"/>
+                android:textSize="14sp"/>
         </LinearLayout>
         <ImageView 
             android:layout_width="6dip"

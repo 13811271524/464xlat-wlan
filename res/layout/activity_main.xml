@@ -47,7 +47,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="left"
-        android:layout_marginLeft="16dp"
+        android:layout_marginLeft="20dp"
         android:textColor="@android:color/black"
         android:layout_toRightOf="@+id/logo"
         android:layout_below="@+id/ClatSwitch"

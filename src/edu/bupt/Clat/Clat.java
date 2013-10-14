@@ -115,10 +115,6 @@ public class Clat {
 			Script.append("chmod 644 /data/misc/clatd.conf\n");
 		}
 		
-		Script.append("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4\n");
-		Script.append("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4\n");
-		Script.append("ip addr add 128.0.0.0/1 via 192.168.255.1 dev clat4\n");
-		
 /*		OriginDefaultRoute = RunAsRoot.execCommand("ip route |grep default |grep "+interfaceName);
 		if(OriginDefaultRoute != null) {
 			RunAsRoot.execCommand("ip route del "+OriginDefaultRoute);
@@ -183,9 +179,6 @@ public class Clat {
 		Script.append("kill $CLATPID >>/data/misc/clatd.log 2>&1\n");
 		Script.append("rm "+InstallBinary.DATA_DIR+"clatd.pid\n");
 		Script.append("echo `date` ending clatd_kill, pid=$CLATPID >>/data/misc/clatd.log\n");	
-		
-		Script.append("ip route del 0.0.0.0/1 via 192.168.255.1 dev clat4\n");
-		Script.append("ip route del 128.0.0.0/1 via 192.168.255.1 dev clat4\n");
 		
 		Intent stopClat = new Intent(context, RunAsRoot.class);
 		stopClat.putExtra(RunAsRoot.EXTRA_STAGE_NAME, "stop_clat");
