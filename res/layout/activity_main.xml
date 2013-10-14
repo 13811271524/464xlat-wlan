@@ -1,228 +1,118 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/scrollView1"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_alignParentLeft="true"
-    android:layout_alignParentTop="true"
+    android:padding="24dp"
+    android:background="@drawable/title_bg"
     tools:context=".MainActivity" >
-
-<RelativeLayout
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
-	    
-	<TextView
-	    android:id="@+id/ClatAddrLabel"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_alignLeft="@+id/ClatAddrLabel2"
-	    android:layout_below="@+id/ClatAddrLabel2"	    
-
-	    android:layout_marginTop="20dp"
-	    android:text="@string/ClatAddr"
-	    android:textAppearance="?android:attr/textAppearanceMedium" />
-	<!--  	    android:layout_alignParentLeft="true"
-	    android:layout_alignParentTop="true"
-	    android:layout_marginLeft="20dp"-->
-
-    <TextView
-        android:id="@+id/ClatAddr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textIsSelectable="false"
-        
-        android:layout_alignRight="@+id/on"
-        android:layout_alignBottom="@+id/ClatAddrLabel"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="20dp"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-    <!-- android:layout_alignBaseline="@+id/ClatAddrLabel"
-        android:layout_alignBottom="@+id/ClatAddrLabel" -->
     
-    <TextView
-	    android:id="@+id/ClatAddrLabel2"
-	    android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <!--     android:layout_row="0"
+        android:layout_column="0" -->
+    
+    <ImageView 
+        android:id="@+id/logo" 
+        android:contentDescription="@string/logo"
         android:layout_alignParentLeft="true"
 	    android:layout_alignParentTop="true"
-        android:layout_marginLeft="20dp"
-	    android:layout_marginTop="20dp"
-        android:singleLine="true"
-	    android:text="@string/CLATSwitch"
-	    android:textAppearance="?android:attr/textAppearanceMedium" />
+	    android:layout_marginLeft="40dp"
+	    android:layout_marginTop="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_launcher"
+        android:scaleType="fitCenter" />
     
-    	    <!--android:textColor="#000000"-->
-
-    <org.slipbtn.SlipButton
+    <view
         android:id="@+id/on"
-        android:layout_width="100dip"
-        android:layout_height="40dip"
-        android:layout_toRightOf="@id/ClatAddrLabel2"
-         
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="50dp"
-            />
-
-	<TextView
-	    android:id="@+id/ClatStatusLabel"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_alignLeft="@+id/ClatAddrLabel"
-	    android:layout_below="@+id/ClatAddrLabel"
-	    android:layout_marginTop="20dp"
-	    android:text="@string/ClatStatus"
-	    android:textAppearance="?android:attr/textAppearanceMedium" />
-
+        android:layout_toRightOf="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginLeft="40dp"
+        class="org.slipbtn.SlipButton" />
+    
     <TextView
-        android:id="@+id/ClatStatus"
+        android:id="@+id/ClatSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/ClatAddr"
-        android:layout_alignBottom="@+id/ClatStatusLabel"
-        android:textIsSelectable="false"
+        android:text="@string/CLATSwitch"
+        android:layout_toRightOf="@+id/logo"
+	    android:layout_below="@+id/on"
+        android:layout_marginLeft="40dp"
+        android:textAppearance="?android:attr/textAppearanceMedium" />   
         
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-    <!-- android:layout_alignParentRight="true"
-        android:layout_marginRight="20dp" -->
-    
-    <TextView
-        android:id="@+id/WIFIStatusLabel"
+    <TextView 
+        android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/ClatStatusLabel"
-        android:layout_below="@+id/ClatStatusLabel"
-        android:layout_marginTop="20dp"
-        android:text="@string/WIFIStatus"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:layout_gravity="left"
+        android:layout_marginLeft="16dp"
+        android:textColor="@android:color/black"
+        android:layout_toRightOf="@+id/logo"
+        android:layout_below="@+id/ClatSwitch"
+        android:textSize="12sp"/>
     
-    <TextView
-        android:id="@+id/WIFIStatus"
+    <LinearLayout
+        android:id="@+id/authenticate_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/WIFIStatusLabel"
-        android:layout_alignRight="@+id/ClatStatus"
-        android:textIsSelectable="false"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-    
-    <TextView
-        android:id="@+id/IPv4AddressLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/WIFIStatusLabel"
-        android:layout_below="@+id/WIFIStatusLabel"
-        android:layout_marginTop="20dp"
-        android:text="@string/IPv4Address"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:layout_below="@+id/logo" >
 
-    <TextView
-        android:id="@+id/IPv4Address"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/IPv4AddressLabel"
-        android:layout_alignRight="@+id/WIFIStatus"
-        android:textIsSelectable="false"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-    
-   	<TextView
-   	    android:id="@+id/IPv6AddressLabel"
-   	    android:layout_width="wrap_content"
-   	    android:layout_height="wrap_content"
-   	    android:layout_alignLeft="@+id/IPv4AddressLabel"
-   	    android:layout_below="@+id/IPv4AddressLabel"
-   	    android:layout_marginTop="20dp"
-   	    android:text="@string/IPv6Address"
-   	    android:textAppearance="?android:attr/textAppearanceMedium" />
-    
-    <TextView
-        android:id="@+id/IPv6Address"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/IPv6AddressLabel"
-        android:layout_below="@+id/IPv6AddressLabel"
-        android:layout_marginTop="20dp"
-        android:textIsSelectable="false"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="15sp" />
-	
-    <TextView
-        android:id="@+id/LastMessageLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/IPv6Address"
-        android:layout_below="@+id/IPv6Address"
-        android:layout_marginTop="20dp"
-        android:text="@string/LastMessage"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        <include layout="@layout/authenticate" />
+    </LinearLayout>
 
-    <TextView
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/authenticate_layout" >
+
+        <include layout="@layout/function_list" />
+    </LinearLayout>
+        
+    <!-- TextView
         android:id="@+id/LastMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/LastMessageLabel"
-        android:layout_below="@+id/LastMessageLabel"
-        android:layout_marginTop="20dp"
-        android:textIsSelectable="false"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <TextView
-        android:id="@+id/BinaryStatusLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/LastMessage"
-        android:layout_below="@+id/LastMessage"
-        android:layout_marginTop="20dp"
-        android:text="@string/BinaryStatus"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:gravity="top"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textIsSelectable="false" /-->
     
-	<TextView
-        android:id="@+id/BinaryStatus"
+    <!-- ImageView 
+        android:id="@+id/net_info"
+        android:layout_alignParentLeft="true"
+	    android:layout_marginLeft="60dp"
+        android:contentDescription="@string/logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/BinaryStatusLabel"
-        android:layout_below="@+id/BinaryStatusLabel"
-        android:layout_marginTop="20dp"
-        android:textIsSelectable="false"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-	<TextView
-	    android:id="@+id/StdoutLabel"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_below="@+id/BinaryStatus"
-	    android:layout_alignLeft="@+id/BinaryStatus"
-	    android:layout_marginTop="20dp"
-	    android:text="@string/StdoutLabel"
-	    android:textAppearance="?android:attr/textAppearanceMedium" />
-
-	<TextView
-	    android:id="@+id/Stdout"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_below="@+id/StdoutLabel"
-	    android:layout_alignLeft="@+id/StdoutLabel"
-	    android:layout_marginTop="20dp"
-	    android:textIsSelectable="false"
-	    android:textAppearance="?android:attr/textAppearanceMedium" />
-
-	<TextView
-	    android:id="@+id/StderrLabel"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_below="@+id/Stdout"
-	    android:layout_alignLeft="@+id/Stdout"
-	    android:layout_marginTop="20dp"
-	    android:text="@string/StderrLabel"
-	    android:textAppearance="?android:attr/textAppearanceMedium" />
-
-	<TextView
-	    android:id="@+id/Stderr"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_below="@+id/StderrLabel"
-	    android:layout_alignLeft="@+id/StderrLabel"
-	    android:layout_marginTop="20dp"
-	    android:textIsSelectable="false"
-	    android:textAppearance="?android:attr/textAppearanceMedium" />
-			
-</RelativeLayout>	    
-</ScrollView>
+        android:src="@drawable/net_info"
+        android:scaleType="fitCenter" />
+    
+    <ImageView 
+        android:id="@+id/bw_meter" 
+        android:contentDescription="@string/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="20dp"
+        android:src="@drawable/bw_meter"
+        android:scaleType="fitCenter" />
+    
+    <ImageView 
+        android:id="@+id/help" 
+        android:contentDescription="@string/logo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/help"
+        android:scaleType="fitCenter" />
+    
+    <ImageView 
+        android:id="@+id/update" 
+        android:contentDescription="@string/logo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="20dp"
+        android:src="@drawable/update"
+        android:scaleType="fitCenter" /-->
+    
+</RelativeLayout>

@@ -21,7 +21,8 @@ public class Clat {
 //	public String WiFiMacAddr = GetMacIP.getLocalMacAddress();
 //	Bundle mbundle = this.getIntent().getExtras();
 //	String[] ClatSubfix = mbundle.getStringArray(GetMacIP.v6ID);
-	
+	public static String OriginDefaultRoute = null;
+	private static String running = null;
 		
 	public static String getClatInterface() {
 		InitFromDisk();
@@ -30,7 +31,24 @@ public class Clat {
 	
 	public static boolean ClatRunning() {
 		InitFromDisk();
+		
+		try {
+			running = RunAsRoot.execCommand("ip addr | grep clat");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		Log.d("running","upy "+running+"012");
+		
+		if(running == null || running.equals("")) {
+			Log.d("running","upyAA");
+			return false;
+		}
+		
+		Log.d("running","upyK "+running+" kkk "+ClatInterface);
 		return ClatInterface != null;
+//		return true;
 	}
 	
 	private static void WriteClatState(String interfaceName) {
@@ -68,13 +86,15 @@ public class Clat {
 	
 	public static void startClat(Context context, String interfaceName) throws IOException {
 		InitFromDisk();
-		if(ClatInterface != null) {
+//		if(ClatInterface != null) {
+		if(ClatRunning()) {
 			Log.e("startClat", "Clat was already started");
 			return;
 		}
 		
 		ClatInterface = interfaceName;
-		hasClatdState = true;		
+		hasClatdState = true;
+		OriginDefaultRoute = null;
 		
 		WriteClatState(interfaceName);
 		
@@ -91,15 +111,26 @@ public class Clat {
 		
 		if(!clat_conf.exists()){
 			Script.append("cat "+InstallBinary.DATA_DIR+"clatd.conf >/data/misc/clatd.conf\n");
+			Script.append("echo ipv6_host_id "+MainActivity.ClatSubfix+" >>/data/misc/clatd.conf\n");
 			Script.append("chmod 644 /data/misc/clatd.conf\n");
 		}
+		
+		Script.append("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4\n");
+		Script.append("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4\n");
+		Script.append("ip addr add 128.0.0.0/1 via 192.168.255.1 dev clat4\n");
+		
+/*		OriginDefaultRoute = RunAsRoot.execCommand("ip route |grep default |grep "+interfaceName);
+		if(OriginDefaultRoute != null) {
+			RunAsRoot.execCommand("ip route del "+OriginDefaultRoute);
+		}
+		Log.d("clatStart","upy0 "+OriginDefaultRoute);*/
 		
 //		Script.append("cat "+InstallBinary.DATA_DIR+"clatd.conf >/system/etc/clatd.conf\n");
 //		Script.append("echo "+ClatSubfix+" >> /data/misc/clatd.conf\n");		
 //		Script.append("chmod 644 /system/etc/clatd.conf\n");
 //		Script.append(InstallBinary.BIN_DIR+"clatd -i "+interfaceName+" -c /data/misc/clatd.conf >/dev/null 2>&1 &\n");
 		Script.append(InstallBinary.BIN_DIR+"clatd -i "+interfaceName+" >/dev/null 2>&1 &\n");
-		Log.d("clatStart","upy0"+interfaceName);
+		Log.d("clatStart","upy0.1 "+interfaceName);
 		Script.append("CLATPID=$!\n");
 		Script.append("echo $CLATPID >"+InstallBinary.DATA_DIR+"clatd.pid\n");
 		Script.append("echo started clat, pid = $CLATPID\n");
@@ -112,22 +143,23 @@ public class Clat {
 		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat/proxy_ndp\n");
 		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat4/proxy_ndp\n");
 		
+		Log.d("clatStart","upy0.2 "+MainActivity.ClatIPv6Addr);
 		Script.append("ip -6 neigh add proxy "+MainActivity.ClatIPv6Addr+" dev "+RunAsRoot.execCommand("getprop wifi.interface")+"\n");
 		
 		Script.append("setprop net.dns1 8.8.8.8\n");
-		Log.d("clatStart","upyA");
+//		Log.d("clatStart","upyA");
 		Script.append("setprop net.dns2 114.114.115.115\n");
 		Script.append("setprop net.wlan0.dns1 8.8.8.8\n");
-		Log.d("clatStart","upyB");
+//		Log.d("clatStart","upyB");
 		Script.append("setprop net.wlan0.dns2 114.114.115.115\n");
 		Script.append("setprop dhcp.wlan0.dns4 8.8.8.8\n");
-		Log.d("clatStart","upyC");
+//		Log.d("clatStart","upyC");
 		Script.append("setprop dhcp.wlan0.dns3 114.114.115.115\n");
 		
 		Intent startClat = new Intent(context, RunAsRoot.class);
 		startClat.putExtra(RunAsRoot.EXTRA_STAGE_NAME, "start_clat");
 		startClat.putExtra(RunAsRoot.EXTRA_SCRIPT_CONTENTS, Script.toString());
-		context.startService(startClat);
+		context.startService(startClat);		
 	}
 	
 	public static void stopClatIfStarted(Context context) {
@@ -150,11 +182,25 @@ public class Clat {
 		Script.append("echo killing pid $CLATPID\n");
 		Script.append("kill $CLATPID >>/data/misc/clatd.log 2>&1\n");
 		Script.append("rm "+InstallBinary.DATA_DIR+"clatd.pid\n");
-		Script.append("echo `date` ending clatd_kill, pid=$CLATPID >>/data/misc/clatd.log\n");
+		Script.append("echo `date` ending clatd_kill, pid=$CLATPID >>/data/misc/clatd.log\n");	
+		
+		Script.append("ip route del 0.0.0.0/1 via 192.168.255.1 dev clat4\n");
+		Script.append("ip route del 128.0.0.0/1 via 192.168.255.1 dev clat4\n");
 		
 		Intent stopClat = new Intent(context, RunAsRoot.class);
 		stopClat.putExtra(RunAsRoot.EXTRA_STAGE_NAME, "stop_clat");
 		stopClat.putExtra(RunAsRoot.EXTRA_SCRIPT_CONTENTS, Script.toString());
+		
+/*		Log.d("start","upy1 "+OriginDefaultRoute);
+		if(OriginDefaultRoute != null || OriginDefaultRoute.equals("")) {
+			try {
+				RunAsRoot.execCommand("ip route add "+OriginDefaultRoute);
+			} catch (IOException e) {
+
+				e.printStackTrace();
+			}
+		}*/
+		
 		context.startService(stopClat);
 	}
 	

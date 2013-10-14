@@ -14,5 +14,18 @@
     <string name="StderrLabel">错误信息</string>
     <string name="update">升级</string>
     <string name="newapi">NewApi</string>
+    
+    <string name="logo">logo</string>
+    
+    <string name="login_tv">登录</string>
+    <string name="regist_tv">注册</string>
+    <string name="index_looks_tv">网络信息</string>
+    <string name="index_looks_info_tv">查看当前各项网络信息</string>
+    <string name="index_shopping_tv">流量监控</string>
+    <string name="index_shopping_info_tv">显示通过蓝桥的进出流量</string>
+    <string name="index_show_tv">功能介绍</string>
+    <string name="index_show_info_tv">显示程序帮助信息</string>
+    <string name="index_search_tv">程序更新</string>
+    <string name="index_search_info_tv">手动更新程序</string>
 
 </resources>

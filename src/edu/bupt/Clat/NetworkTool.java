@@ -22,7 +22,7 @@ public class NetworkTool extends Thread {
 	private static StringBuilder sb = null;
 	
 	/**
-	* 获取网址内容
+	* 鑾峰彇缃戝潃鍐呭
 	* @param url
 	* @return
 	* @throws Exception
@@ -39,7 +39,7 @@ public class NetworkTool extends Thread {
 			    
 			    HttpClient client = new DefaultHttpClient();
 			    HttpParams httpParams = client.getParams();
-			    //设置网络超时参数
+			    //璁剧疆缃戠粶瓒呮椂鍙傛暟
 			    HttpConnectionParams.setConnectionTimeout(httpParams, 3000);
 			    HttpConnectionParams.setSoTimeout(httpParams, 5000);
 			    HttpResponse response = null;

@@ -33,7 +33,7 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 	protected static String WiFiInterfaceName = null;
 	public final static String ACTION_CONNECTIVITY_CHANGE = "edu.bupt.464xlat.ConnectionChanges";
 	public final static String EXTRA_MESSAGE = "message";
-	private static String OriginDefaultRoute = null;
+//	private static String OriginDefaultRoute;
 	
 	protected static NetworkInfo aInfo = null;
 	
@@ -111,7 +111,7 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 		if(!found_interface) {
 			WiFiInterfaceName = RunAsRoot.execCommand("getprop wifi.interface");
 			WiFiIPv6Address = getLocalIpAddress();
-			WiFiIPv6SubnetLength = null;
+			WiFiIPv6SubnetLength = 64;
 		}
 	}
 	
@@ -126,6 +126,8 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 			}
 		}
 		
+//		OriginDefaultRoute = null;
+		
 	    NetworkInfo[] netInfo = cm.getAllNetworkInfo();
 	    for (NetworkInfo ni : netInfo) {
 	    	if(ni.getTypeName().equalsIgnoreCase("wifi")||ni.getTypeName().equalsIgnoreCase("Wi-Fi")) {
@@ -139,9 +141,16 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 	    				// only start clat if we're on a V6-only network
 	    				// del WiFiIPv4Address == null &&
 	    				if( WiFiIPv6Address != null) {
-	    					OriginDefaultRoute = new String(RunAsRoot.execCommand("ip route |grep default |grep "+WiFiInterfaceName));
-	    					RunAsRoot.execCommand("ip route del "+OriginDefaultRoute);
+//	    					OriginDefaultRoute = new String(RunAsRoot.execCommand("ip route |grep default |grep "+WiFiInterfaceName));
+//	    					RunAsRoot.execCommand("ip route del "+OriginDefaultRoute);
 	    					Clat.stopClatIfStarted(context);
+	    					if(getWiFiIPv6Address() != null && MainActivity.ClatSubfix != null) {
+	    						MainActivity.ClatIPv6Addr = getWiFiIPv6Address().substring(0, 20)+MainActivity.ClatSubfix.substring(2);
+	    					}
+	    					else {
+	    						MainActivity.ClatIPv6Addr = "无";
+	    					}
+	    					
 	    					Clat.startClat(context,WiFiInterfaceName);
 	    				}
 	    			} else {

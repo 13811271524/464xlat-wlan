@@ -16,5 +16,25 @@
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
+    
+    <style name="Text">
+        <item name="android:textStyle">normal</item>
+    </style>
+    
+    <style name="CustomWindowTitleBackground"> 
+        <item name="android:background">@drawable/title_bg</item> 
+    </style> 
+    <style name="CustomTitleBar" parent="android:Theme"> 
+        <item name="android:windowTitleSize">40dp</item> 
+        <item name="android:windowTitleBackgroundStyle">@style/CustomWindowTitleBackground</item> <!--设置titlebar的背景-->
+    </style>
+    
+    <!-- style name="Text.Title" parent="@style/Text">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:gravity">center</item>
+    </style-->
 
 </resources>
