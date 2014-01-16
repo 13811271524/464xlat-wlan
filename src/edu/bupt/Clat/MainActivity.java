@@ -24,11 +24,13 @@ import org.slipbtn.SlipButton.OnChangedListener;
 public class MainActivity extends Activity {
 	TextView ClatAddr, WiFiStatus, LastMessage, BinaryStatus, IPv4Address, IPv6Address, ClatStatus, Stdout, Stderr;
 	
-	private String DefaultRoute = null, wifiinfo;
+//	private String DefaultRoute = null;
+	private String wifiinfo;
 	protected String OriginRoute;
 	protected static String ClatSubfix = null;
 	protected static String WiFiMacAddr = null;
 	protected static String ClatIPv6Addr = null;
+	public static int flag = 0;
 
 	private SlipButton mSlipButton = null;
 	
@@ -75,6 +77,16 @@ public class MainActivity extends Activity {
 		InstallBinary install = new InstallBinary(this);
 		install.go();	
 		
+		try {
+			RunAsRoot.execCommand("setprop dhcp.wlan0.dns1 2001:250:f004:f001::130");
+			RunAsRoot.execCommand("setprop dhcp.wlan0.dns2 8.8.8.8");
+			RunAsRoot.execCommand("setprop net.dns1 2001:250:f004:f001::130");
+			RunAsRoot.execCommand("setprop net.dns2 8.8.8.8");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}		
+		
 		Log.d("mac","upy01"+WiFiMacAddr);
 				
 		WiFiMacAddr = getLocalMacAddress();
@@ -83,6 +95,17 @@ public class MainActivity extends Activity {
 			ClatSubfix = MacToIPv6(WiFiMacAddr);
 		
 		Log.d("mac","upy04"+ClatSubfix);
+		
+		File system_bin_su = new File("/system/bin/su");
+		if(!system_bin_su.exists()) {
+			flag = 1;
+			File system_xbin_su = new File("/system/xbin/su");
+			if(!system_xbin_su.exists()) {
+				LastMessage.setText("No /system/bin/su or /system/xbin/su found");
+				flag = 2;
+//				return;
+			}			
+		}
 				
 		try {
 			ConnectivityReceiver.rescanNetworkStatus(this);
@@ -91,7 +114,14 @@ public class MainActivity extends Activity {
 			e.printStackTrace();
 		}
 		
-		Log.d("mac","upy05"+DefaultRoute);
+/*		try {
+			RunAsRoot.execCommand("setprop dhcp.wlan0.dns1 2001:250:f004:f001::130");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}*/
+		
+/*		Log.d("mac","upy05"+DefaultRoute);
 		
 		try {
 			DefaultRoute = RunAsRoot.execCommand("ip route |grep default |grep "+ConnectivityReceiver.WiFiInterfaceName);
@@ -103,7 +133,7 @@ public class MainActivity extends Activity {
 		if(DefaultRoute != null)
 			OriginRoute = new String(DefaultRoute);
 				
-		Log.d("mac","upy08"+DefaultRoute+"upy09"+OriginRoute);
+		Log.d("mac","upy08"+DefaultRoute+"upy09"+OriginRoute);*/
 		Log.d("mac","upy10"+ConnectivityReceiver.aInfo+"upy11"+ClatIPv6Addr);
 			
 		if(ConnectivityReceiver.aInfo != null && ClatSubfix != null){			
@@ -114,6 +144,7 @@ public class MainActivity extends Activity {
 		}
 		
 		Log.d("mac","upy12"+ClatIPv6Addr);
+		
 		
 		IntentFilter messageFilter = new IntentFilter();
 		messageFilter.addAction(ConnectivityReceiver.ACTION_CONNECTIVITY_CHANGE);
@@ -142,11 +173,7 @@ public class MainActivity extends Activity {
 		findView();
 		setListener();
 
-		File system_xbin_su = new File("/system/xbin/su");
-		if(!system_xbin_su.exists()) {
-			LastMessage.setText("No /system/xbin/su found");
-			return;
-		}
+		
 		
 		File clatd_conf_copied = new File(InstallBinary.DATA_DIR+"clatd_conf_copied");
 		if(!clatd_conf_copied.exists()) {
@@ -207,25 +234,29 @@ public class MainActivity extends Activity {
         {
             
         	public void OnChanged(boolean CheckState) throws IOException {
-        		if (ClatIPv6Addr.equals("无")) {
+        		if (ClatIPv6Addr == null || ClatIPv6Addr.equals("无")) {
         			Toast.makeText(getBaseContext(),"请确保Wi-Fi连接正常并具有IPv6地址" , Toast.LENGTH_SHORT).show();
         			return;
         		}
         		if (CheckState) {
         			if (!Clat.ClatRunning()) {        				
 //            			Clat.stopClatIfStarted(getBaseContext());		
-            			RunAsRoot.execCommand("ip route del "+OriginRoute); 
-            			Log.d("Route","upy"+OriginRoute+"1");
+            			 
+            			//Log.d("Route","upy"+OriginRoute+"1");
             			Clat.startClat(getBaseContext(),ConnectivityReceiver.WiFiInterfaceName);
+            			RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
+            			RunAsRoot.execCommand("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4");
             			Toast.makeText(getBaseContext(),"CLAT开启成功" , Toast.LENGTH_SHORT).show();
         			}
         			else {
+        				RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
+            			RunAsRoot.execCommand("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4");
         				Toast.makeText(getBaseContext(),"CLAT已经开启" , Toast.LENGTH_SHORT).show();
         			}
         	    } else {        			
         			Clat.stopClatIfStarted(getBaseContext());
-        			RunAsRoot.execCommand("ip route add "+OriginRoute);
-        			Log.d("Route","upy"+OriginRoute+"2");
+        			//RunAsRoot.execCommand("ip route add "+OriginRoute);
+        			//Log.d("Route","upy"+OriginRoute+"2");
         			Toast.makeText(getBaseContext(),"已关闭CLAT" , Toast.LENGTH_SHORT).show();
         		}
         	}
@@ -236,7 +267,14 @@ public class MainActivity extends Activity {
     {
     	mSlipButton = (SlipButton) findViewById(R.id.on);
 //        btn = (Button) findViewById(R.id.ringagain);
-    	mSlipButton.setCheck(true);
+    	if(Clat.ClatRunning()) {
+    		Log.d("findView", "upy0");
+    		mSlipButton.setCheck(true);
+    	}
+    	else {
+    		Log.d("findView", "upy1");
+    		mSlipButton.setCheck(false);
+    	}
     }   
 
 }

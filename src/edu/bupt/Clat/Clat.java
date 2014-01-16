@@ -17,6 +17,7 @@ import android.util.Log;
 public class Clat {
 	private static String ClatInterface = null;
 	private static boolean hasClatdState = false;
+	private static String running = null;
 	private static File ClatState = new File(InstallBinary.DATA_DIR, "clat.state");
 //	public String WiFiMacAddr = GetMacIP.getLocalMacAddress();
 //	Bundle mbundle = this.getIntent().getExtras();
@@ -30,6 +31,21 @@ public class Clat {
 	
 	public static boolean ClatRunning() {
 		InitFromDisk();
+		try {
+			running = RunAsRoot.execCommand("ip addr | grep clat");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		Log.d("running","upy "+running+"012");
+		
+		if(running == null || running.equals("")) {
+			Log.d("running","upyAA");
+			return false;
+		}
+		
+		Log.d("running","upyK "+running+" kkk "+ClatInterface);
 		return ClatInterface != null;
 	}
 	
@@ -91,6 +107,7 @@ public class Clat {
 		
 		if(!clat_conf.exists()){
 			Script.append("cat "+InstallBinary.DATA_DIR+"clatd.conf >/data/misc/clatd.conf\n");
+			Script.append("echo ipv6_host_id "+MainActivity.ClatSubfix+" >>/data/misc/clatd.conf\n");
 			Script.append("chmod 644 /data/misc/clatd.conf\n");
 		}
 		
@@ -113,8 +130,9 @@ public class Clat {
 		
 		Script.append("ip -6 neigh add proxy "+MainActivity.ClatIPv6Addr+" dev "+RunAsRoot.execCommand("getprop wifi.interface")+"\n");
 		
-		Script.append("setprop net.dns1 8.8.8.8\n");
-		Script.append("setprop net.dns2 114.114.115.115\n");
+//		Script.append("setprop net.dns1 2001:250:f004:f001::130\n");
+//		Script.append("setprop net.dns1 8.8.8.8\n");
+//		Script.append("setprop net.dns2 114.114.115.115\n");
 		
 		Intent startClat = new Intent(context, RunAsRoot.class);
 		startClat.putExtra(RunAsRoot.EXTRA_STAGE_NAME, "start_clat");

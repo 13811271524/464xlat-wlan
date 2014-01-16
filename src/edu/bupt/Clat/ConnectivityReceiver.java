@@ -3,6 +3,7 @@ package edu.bupt.Clat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.Inet6Address;
 //import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -31,7 +32,7 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 	protected static String WiFiInterfaceName = null;
 	public final static String ACTION_CONNECTIVITY_CHANGE = "edu.bupt.464xlat.ConnectionChanges";
 	public final static String EXTRA_MESSAGE = "message";
-	private static String OriginDefaultRoute = null;
+//	private static String OriginDefaultRoute = null;
 	
 	protected static NetworkInfo aInfo = null;
 	
@@ -137,8 +138,11 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 	    				// only start clat if we're on a V6-only network
 	    				// del WiFiIPv4Address == null &&
 	    				if( WiFiIPv6Address != null) {
-	    					OriginDefaultRoute = new String(RunAsRoot.execCommand("ip route |grep default |grep "+WiFiInterfaceName));
-	    					RunAsRoot.execCommand("ip route del "+OriginDefaultRoute);
+	    				//	OriginDefaultRoute = new String(RunAsRoot.execCommand("ip route |grep default |grep "+WiFiInterfaceName));
+	    					RunAsRoot.execCommand("setprop dhcp.wlan0.dns1 2001:250:f004:f001::130");
+	    					RunAsRoot.execCommand("setprop dhcp.wlan0.dns2 8.8.8.8");
+	    					RunAsRoot.execCommand("setprop net.dns1 2001:250:f004:f001::130");
+	    					RunAsRoot.execCommand("setprop net.dns2 8.8.8.8");
 	    					Clat.stopClatIfStarted(context);
 	    					Clat.startClat(context,WiFiInterfaceName);
 	    				}
@@ -188,23 +192,34 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 		}
 	}
 	
-	public static String getLocalIpAddress() {    
-        try {    
-            for (Enumeration<NetworkInterface> en = NetworkInterface    
-                    .getNetworkInterfaces(); en.hasMoreElements();) {    
-                NetworkInterface intf = en.nextElement();    
-                for (Enumeration<InetAddress> enumIpAddr = intf    
-                        .getInetAddresses(); enumIpAddr.hasMoreElements();) {    
-                    InetAddress inetAddress = enumIpAddr.nextElement();    
-                    if (!inetAddress.isLoopbackAddress()) {    
-                        return inetAddress.getHostAddress().toString();    
-                    }    
-                }    
-            }    
-        } catch (SocketException ex) {    
-            Log.e("WifiPreference IpAddress", ex.toString());    
-        }    
-        return null;    
+	public static String getLocalIpAddress() throws IOException {
+        InetAddress inetAddress = null;
+        Enumeration<NetworkInterface> networkInterfaces = NetworkInterface
+                .getNetworkInterfaces();
+        outer: while (networkInterfaces.hasMoreElements()) {
+            Enumeration<InetAddress> inetAds = networkInterfaces.nextElement()
+                    .getInetAddresses();
+            while (inetAds.hasMoreElements()) {
+                inetAddress = inetAds.nextElement(); 
+                // Check if it's ipv6 address and reserved address
+                if (inetAddress instanceof Inet6Address && !isReservedAddr(inetAddress)) {
+                    break outer;  
+                }
+                inetAddress = null; //In case when there is no IPv6 interface! 
+            }
+        }
+ 
+        if (inetAddress != null) {
+        	String ipAddr = inetAddress.getHostAddress();
+        	// Filter network card No
+        	int index = ipAddr.indexOf('%');
+        	if (index > 0) {
+        		ipAddr = ipAddr.substring(0, index);
+        	}
+ 
+        	return ipAddr;
+        }
+        else return null;
     }  
 	
 	public static String getLocalIp4Address() {  
@@ -226,5 +241,14 @@ public class ConnectivityReceiver extends BroadcastReceiver {
         
         
              return null;  
-} 
+    } 
+	
+	private static boolean isReservedAddr(InetAddress inetAddr) {
+        if (inetAddr.isAnyLocalAddress() || inetAddr.isLinkLocalAddress()
+                || inetAddr.isLoopbackAddress()) {
+            return true;
+        }
+ 
+        return false;
+    }
 }
