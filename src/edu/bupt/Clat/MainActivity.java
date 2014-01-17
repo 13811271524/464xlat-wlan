@@ -136,7 +136,7 @@ public class MainActivity extends Activity {
 		Log.d("mac","upy08"+DefaultRoute+"upy09"+OriginRoute);*/
 		Log.d("mac","upy10"+ConnectivityReceiver.aInfo+"upy11"+ClatIPv6Addr);
 			
-		if(ConnectivityReceiver.aInfo != null && ClatSubfix != null){			
+		if(ConnectivityReceiver.getWiFiIPv6Address().length() > 20 && ClatSubfix != null){			
 			ClatIPv6Addr = ConnectivityReceiver.getWiFiIPv6Address().substring(0, 20)+ClatSubfix.substring(2);
 		}
 		else {			
