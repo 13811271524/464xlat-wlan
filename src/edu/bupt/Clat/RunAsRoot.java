@@ -77,15 +77,17 @@ public class RunAsRoot extends IntentService {
 		RootShellScript_out.write(ScriptContents.getBytes());
 		RootShellScript_out.close();
 		
-		InstallBinary.chmod("755",RootShellScript.getPath());
+		InstallBinary.chmod("755",RootShellScript.getPath());		
 		
 		Process process;
-		if(MainActivity.flag == 0) {
+/*		if(MainActivity.flag == 0) {
 			process = Runtime.getRuntime().exec("/system/bin/su -c "+RootShellScript.getPath());
 		}
 		else {
 			process = Runtime.getRuntime().exec("/system/xbin/su -c "+RootShellScript.getPath());
 		}
+ */
+		process = Runtime.getRuntime().exec("su -c "+RootShellScript.getPath());
 		
 		InputStream stdout = process.getInputStream();
 		InputStream stderr = process.getErrorStream();

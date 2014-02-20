@@ -77,7 +77,7 @@ public class MainActivity extends Activity {
 		InstallBinary install = new InstallBinary(this);
 		install.go();	
 		
-		try {
+/*		try {
 			RunAsRoot.execCommand("setprop dhcp.wlan0.dns1 2001:250:f004:f001::130");
 			RunAsRoot.execCommand("setprop dhcp.wlan0.dns2 8.8.8.8");
 			RunAsRoot.execCommand("setprop net.dns1 2001:250:f004:f001::130");
@@ -86,9 +86,9 @@ public class MainActivity extends Activity {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}		
-		
+
 		Log.d("mac","upy01"+WiFiMacAddr);
-				
+ */			
 		WiFiMacAddr = getLocalMacAddress();
 		Log.d("mac","upy02"+WiFiMacAddr+"upy03"+ClatSubfix);
 		if(WiFiMacAddr != null)
@@ -152,6 +152,13 @@ public class MainActivity extends Activity {
 		messageFilter.addAction(RunAsRoot.ACTION_ROOTSCRIPT_DONE);
 		LocalBroadcastManager.getInstance(this).registerReceiver(mConnectionChanges, messageFilter);
 		
+		try {
+			RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
+			RunAsRoot.execCommand("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}		
 		
 		ClatAddr = (TextView) findViewById(R.id.ClatAddr);
 		WiFiStatus = (TextView) findViewById(R.id.WIFIStatus);

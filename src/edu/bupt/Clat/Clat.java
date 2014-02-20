@@ -128,6 +128,15 @@ public class Clat {
 		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat/proxy_ndp\n");
 		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat4/proxy_ndp\n");
 		
+		if(ConnectivityReceiver.getWiFiIPv6Address().length() > 20 && MainActivity.ClatSubfix != null){			
+			MainActivity.ClatIPv6Addr = ConnectivityReceiver.getWiFiIPv6Address().substring(0, 20)+MainActivity.ClatSubfix.substring(2);
+		}
+		else {			
+			MainActivity.ClatIPv6Addr = "нч";
+			Log.e("startClat", "Clat has no address");
+			return;
+		}
+		
 		Script.append("ip -6 neigh add proxy "+MainActivity.ClatIPv6Addr+" dev "+RunAsRoot.execCommand("getprop wifi.interface")+"\n");
 		
 //		Script.append("setprop net.dns1 2001:250:f004:f001::130\n");
@@ -137,7 +146,11 @@ public class Clat {
 		Intent startClat = new Intent(context, RunAsRoot.class);
 		startClat.putExtra(RunAsRoot.EXTRA_STAGE_NAME, "start_clat");
 		startClat.putExtra(RunAsRoot.EXTRA_SCRIPT_CONTENTS, Script.toString());
+		RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
+		RunAsRoot.execCommand("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4");
 		context.startService(startClat);
+		RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
+		RunAsRoot.execCommand("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4");
 	}
 	
 	public static void stopClatIfStarted(Context context) {
