@@ -139,12 +139,28 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 	    				// del WiFiIPv4Address == null &&
 	    				if( WiFiIPv6Address != null) {
 	    				//	OriginDefaultRoute = new String(RunAsRoot.execCommand("ip route |grep default |grep "+WiFiInterfaceName));
-	    					RunAsRoot.execCommand("setprop dhcp.wlan0.dns1 2001:250:f004:f001::130");
+	    					RunAsRoot.execCommand("setprop dhcp.wlan0.dns1 2001:c68:300:131::2");
 	    					RunAsRoot.execCommand("setprop dhcp.wlan0.dns2 8.8.8.8");
-	    					RunAsRoot.execCommand("setprop net.dns1 2001:250:f004:f001::130");
+	    					RunAsRoot.execCommand("setprop net.dns1 2001:c68:300:131::2");
 	    					RunAsRoot.execCommand("setprop net.dns2 8.8.8.8");
+	    					Log.d("connect","upy modified DNS");
 	    					Clat.stopClatIfStarted(context);
 	    					Clat.startClat(context,WiFiInterfaceName);
+	    					if(getWiFiIPv6Address().length() > 20 && MainActivity.ClatSubfix != null){			
+	    						MainActivity.ClatIPv6Addr = getWiFiIPv6Address().substring(0, 20)+MainActivity.ClatSubfix.substring(2);
+	    						Log.d("connect","upy getWiFiIPv6Address");
+	    					}
+	    					
+	    					RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/all/forwarding");
+	    					RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat/forwarding");
+	    					RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat4/forwarding");
+	    					RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat4/proxy_ndp");
+	    					RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat/proxy_ndp");
+	    					RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/all/proxy_ndp");
+	    					RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
+	    					RunAsRoot.execCommand("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4");
+	    					RunAsRoot.execCommand("ip -6 neigh add proxy "+MainActivity.ClatIPv6Addr+" dev "+RunAsRoot.execCommand("getprop wifi.interface"));
+	    					Log.d("connect","upy added all superabc");
 	    				}
 	    			} else {
 	    				Log.d("rescan", "other state "+wifiStatus.toString());

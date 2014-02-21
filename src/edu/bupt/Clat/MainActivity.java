@@ -47,6 +47,18 @@ public class MainActivity extends Activity {
 		IPv6Address.setText(ConnectivityReceiver.getWiFiIPv6Address());
 		IPv4Address.setText("192.168.255.1");
 		ClatStatus.setText(Clat.getClatInterface());
+		
+		try {
+			RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
+			RunAsRoot.execCommand("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4");
+			RunAsRoot.execCommand("ip -6 neigh add proxy "+ClatIPv6Addr+" dev "+RunAsRoot.execCommand("getprop wifi.interface"));
+			Log.d("mainU","upy100 ClatIPv6Addr:"+ClatIPv6Addr);
+			Log.d("mainU","upy superabc");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	private BroadcastReceiver mConnectionChanges = new BroadcastReceiver() {
@@ -143,7 +155,7 @@ public class MainActivity extends Activity {
 			ClatIPv6Addr = "无";
 		}
 		
-		Log.d("mac","upy12"+ClatIPv6Addr);
+		Log.d("mac","upy12 ClatIPv6Addr:"+ClatIPv6Addr);
 		
 		
 		IntentFilter messageFilter = new IntentFilter();
@@ -153,12 +165,22 @@ public class MainActivity extends Activity {
 		LocalBroadcastManager.getInstance(this).registerReceiver(mConnectionChanges, messageFilter);
 		
 		try {
+			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/all/forwarding");
+			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat/forwarding");
+			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat4/forwarding");
+			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat4/proxy_ndp");
+			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat/proxy_ndp");
+			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/all/proxy_ndp");
 			RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
 			RunAsRoot.execCommand("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4");
+			RunAsRoot.execCommand("ip -6 neigh add proxy "+ClatIPv6Addr+" dev "+RunAsRoot.execCommand("getprop wifi.interface"));
+			Log.d("main01","upy100 ClatIPv6Addr:"+ClatIPv6Addr);
+			Log.d("main01","upy superabc");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}		
+
 		
 		ClatAddr = (TextView) findViewById(R.id.ClatAddr);
 		WiFiStatus = (TextView) findViewById(R.id.WIFIStatus);
@@ -196,6 +218,7 @@ public class MainActivity extends Activity {
 						"touch "+InstallBinary.DATA_DIR+"clatd_conf_copied\n" +
 						"ip -6 neigh add proxy "+ClatIPv6Addr+" dev "+RunAsRoot.execCommand("getprop wifi.interface")+"\n"
 						);
+				Log.d("main02","---first run---");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -251,13 +274,32 @@ public class MainActivity extends Activity {
             			 
             			//Log.d("Route","upy"+OriginRoute+"1");
             			Clat.startClat(getBaseContext(),ConnectivityReceiver.WiFiInterfaceName);
+            			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/all/forwarding");
+            			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat/forwarding");
+            			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat4/forwarding");
+            			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat4/proxy_ndp");
+            			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat/proxy_ndp");
+            			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/all/proxy_ndp");
             			RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
             			RunAsRoot.execCommand("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4");
+            			RunAsRoot.execCommand("ip -6 neigh add proxy "+ClatIPv6Addr+" dev "+RunAsRoot.execCommand("getprop wifi.interface"));
+            			
+            			Log.d("main1","upy added all superabc");
             			Toast.makeText(getBaseContext(),"CLAT开启成功" , Toast.LENGTH_SHORT).show();
         			}
         			else {
-        				RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
+        				Clat.startClat(getBaseContext(),ConnectivityReceiver.WiFiInterfaceName);
+            			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/all/forwarding");
+            			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat/forwarding");
+            			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat4/forwarding");
+            			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat4/proxy_ndp");
+            			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/clat/proxy_ndp");
+            			RunAsRoot.execCommand("echo 1 > /proc/sys/net/ipv6/conf/all/proxy_ndp");
+            			RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
             			RunAsRoot.execCommand("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4");
+            			RunAsRoot.execCommand("ip -6 neigh add proxy "+ClatIPv6Addr+" dev "+RunAsRoot.execCommand("getprop wifi.interface"));
+            			
+            			Log.d("main2","upy added all superabc");
         				Toast.makeText(getBaseContext(),"CLAT已经开启" , Toast.LENGTH_SHORT).show();
         			}
         	    } else {        			

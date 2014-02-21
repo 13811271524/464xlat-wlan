@@ -87,7 +87,10 @@ public class RunAsRoot extends IntentService {
 			process = Runtime.getRuntime().exec("/system/xbin/su -c "+RootShellScript.getPath());
 		}
  */
-		process = Runtime.getRuntime().exec("su -c "+RootShellScript.getPath());
+//		process = Runtime.getRuntime().exec("su -c "+RootShellScript.getPath());
+		process = Runtime.getRuntime().exec("/system/xbin/su -c "+RootShellScript.getPath());
+		
+		Log.d("root","run root");
 		
 		InputStream stdout = process.getInputStream();
 		InputStream stderr = process.getErrorStream();

@@ -109,36 +109,43 @@ public class Clat {
 			Script.append("cat "+InstallBinary.DATA_DIR+"clatd.conf >/data/misc/clatd.conf\n");
 			Script.append("echo ipv6_host_id "+MainActivity.ClatSubfix+" >>/data/misc/clatd.conf\n");
 			Script.append("chmod 644 /data/misc/clatd.conf\n");
+			Log.d("clat0","if(!clat_conf.exists())");
+			
 		}
 		
 //		Script.append("cat "+InstallBinary.DATA_DIR+"clatd.conf >/system/etc/clatd.conf\n");
 //		Script.append("echo "+ClatSubfix+" >> /data/misc/clatd.conf\n");		
 //		Script.append("chmod 644 /system/etc/clatd.conf\n");
-//		Script.append(InstallBinary.BIN_DIR+"clatd -i "+interfaceName+" -c /data/misc/clatd.conf >/dev/null 2>&1 &\n");
-		Script.append(InstallBinary.BIN_DIR+"clatd -i "+interfaceName+" >/dev/null 2>&1 &\n");
+		Script.append(InstallBinary.BIN_DIR+"clatd -i "+interfaceName+" -c /data/misc/clatd.conf >/dev/null 2>&1 &\n");
+//		Script.append(InstallBinary.BIN_DIR+"clatd -i "+interfaceName+" >/dev/null 2>&1 &\n");
 		Script.append("CLATPID=$!\n");
 		Script.append("echo $CLATPID >"+InstallBinary.DATA_DIR+"clatd.pid\n");
 		Script.append("echo started clat, pid = $CLATPID\n");
 		Script.append("echo `date` ending clatd_launch, pid = $CLATPID >>/data/misc/clatd.log\n");
 		
 		Script.append("echo 1 > /proc/sys/net/ipv6/conf/all/forwarding\n");
-		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat/forwarding\n");
-		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat4/forwarding\n");
+//		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat/forwarding\n");
+//		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat4/forwarding\n");
 		Script.append("echo 1 > /proc/sys/net/ipv6/conf/all/proxy_ndp\n");
-		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat/proxy_ndp\n");
-		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat4/proxy_ndp\n");
+//		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat/proxy_ndp\n");
+//		Script.append("echo 1 > /proc/sys/net/ipv6/conf/clat4/proxy_ndp\n");
 		
-		if(ConnectivityReceiver.getWiFiIPv6Address().length() > 20 && MainActivity.ClatSubfix != null){			
+		Log.d("clat1","upy script clat startA");
+		
+/*		if(ConnectivityReceiver.getWiFiIPv6Address().length() > 20 && MainActivity.ClatSubfix != null){			
 			MainActivity.ClatIPv6Addr = ConnectivityReceiver.getWiFiIPv6Address().substring(0, 20)+MainActivity.ClatSubfix.substring(2);
+			Log.d("clat2A","ClatIPv6Addr: "+MainActivity.ClatIPv6Addr);
 		}
 		else {			
-			MainActivity.ClatIPv6Addr = "нч";
+	//		MainActivity.ClatIPv6Addr = "нч";
+			Log.d("clat2B","upy ClatIPv6Addr: no address");
 			Log.e("startClat", "Clat has no address");
 			return;
 		}
 		
 		Script.append("ip -6 neigh add proxy "+MainActivity.ClatIPv6Addr+" dev "+RunAsRoot.execCommand("getprop wifi.interface")+"\n");
-		
+		Log.d("clat3","upy NDP Proxy");
+*/		
 //		Script.append("setprop net.dns1 2001:250:f004:f001::130\n");
 //		Script.append("setprop net.dns1 8.8.8.8\n");
 //		Script.append("setprop net.dns2 114.114.115.115\n");
@@ -146,11 +153,12 @@ public class Clat {
 		Intent startClat = new Intent(context, RunAsRoot.class);
 		startClat.putExtra(RunAsRoot.EXTRA_STAGE_NAME, "start_clat");
 		startClat.putExtra(RunAsRoot.EXTRA_SCRIPT_CONTENTS, Script.toString());
-		RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
-		RunAsRoot.execCommand("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4");
+	//	RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
+	//	RunAsRoot.execCommand("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4");		
 		context.startService(startClat);
 		RunAsRoot.execCommand("ip route add 0.0.0.0/1 via 192.168.255.1 dev clat4");
 		RunAsRoot.execCommand("ip route add 128.0.0.0/1 via 192.168.255.1 dev clat4");
+		Log.d("clat5","upy added route");
 	}
 	
 	public static void stopClatIfStarted(Context context) {
